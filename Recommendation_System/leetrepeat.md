@@ -1,2056 +1,859 @@
-# CrackedIn.io: Competitor Recommendation Strategies Blueprint
+# CrackedIn.io: Competitor Recommendation Strategy Directory
 
-This document summarizes recommendation strategies used by other coding-interview, LeetCode-tracking, spaced-repetition, roadmap, and practice platforms. Our current status
+**Purpose:** This document lists relevant coding-interview, DSA-practice, LeetCode-tracking, spaced-repetition, roadmap, and learning-feedback platforms. It summarizes how each platform appears to guide users toward reviews, next problems, practice lists, weak areas, or learning actions.
 
-- User LeetCode synced ID.
-- Solved and unsolved status for a standard problem sheet.
-- Problem metadata such as title, difficulty, tags, topic, and sheet position.
-- A goal to recommend what the user should review, solve next, reinforce, or avoid for now.
-
-This file intentionally focuses on other platforms and reusable recommendation patterns. It does not use your competitor named in the previous message as a reference.
+**Important note:** This is not a product comparison. It is a competitor/reference directory for understanding public recommendation and learning-flow patterns. The platform LeetRepeat is intentionally excluded.
 
 ---
 
-## 1. Executive summary
+## Executive Summary
 
-Most platforms use one or more of the following recommendation strategies:
+The competitor landscape around DSA practice and interview preparation shows several recurring recommendation strategies:
 
-| Strategy | Used by platforms like | Core idea | How CrackedIn.io can use it |
-|---|---|---|---|
-| Spaced repetition review queue | LeetSRS, LeetRecall, AlgoRecall, SpaceDSA, DSA Spaced Repetition | Recommend solved problems again when the user is likely to forget them. | Build a due-review queue for solved problems using SM-2, FSRS, or a simpler staged scheduler. |
-| Rating-based scheduling | LeetSRS, AlgoRecall, DSA Spaced Repetition | User rates recall after solving: Again/Forgot, Hard, Good, Easy. | Ask for confidence after every solve/review and use it to update next review date. |
-| Auto-capture from LeetCode | LeetRecall, leetcode-review, HashTry-style trackers | Automatically detect accepted submissions and attempt behavior. | Use synced LeetCode history as the base truth, then ask only for missing subjective signals. |
-| Readiness score | HashTry, Aurora-like open-source trackers | Convert quality, speed, topic coverage, consistency, and confidence into one score. | Build CrackedIn Readiness Score by topic and overall. |
-| Roadmap progression | NeetCode, Striver SDE Sheet, Grind 75, LeetDaily | Recommend the next unsolved problem from a curated order. | Use your standard sheet order as a baseline recommendation. |
-| Pattern-first progression | AlgoMonster, NeetCode, Striver A2Z-style sections | Group problems by interview pattern and recommend from easy to hard. | Classify every problem by real pattern, not just broad tags like Array or String. |
-| Weak-topic reinforcement | HashTry, DSA Spaced Repetition, SpaceDSA | Recommend problems from topics where the user struggles. | Use failed attempts, low confidence, long solve time, hints, and overdue reviews to detect weak patterns. |
-| Session-scoped practice | SpaceDSA, DSA Spaced Repetition, AlgoMonster Speedrun | Let users focus on a difficulty, topic, list, or short time block. | Add modes: 30-minute review, DP-only, next roadmap, company target, weak-topic drill. |
-| Gamified mastery | Codewars | Use ranks, XP, progress, and difficulty-relative rewards. | Add pattern levels: Sliding Window L3, Graph BFS L2, DP Stability 41%. |
-| Feedback/mentoring loop | Exercism | Recommend review based on submitted solution quality and feedback needs. | Add AI or peer feedback after solve: complexity, missed edge cases, pattern explanation. |
+1. **Spaced-repetition review queues**  
+   Platforms such as LeetSRS, LeetRecall, AlgoRecall, SpaceDSA, LeetCycle, LeetSpace, and SpacedSmart focus on bringing solved problems back at the right time so users do not forget patterns. Their recommendation flow is usually: solve a problem, rate confidence or performance, schedule a future review, then surface due or overdue problems.
 
-The best strategy for CrackedIn.io is not one algorithm. It should be a hybrid recommender:
+2. **Readiness scoring and weak-area analytics**  
+   HashTry is the clearest example of turning user practice behavior into a readiness score. It uses signals such as solve speed, coverage, quality, consistency, and self-assessment. This strategy helps users understand whether they are actually prepared instead of only seeing a solved-count metric.
 
-```txt
-Recommendation = SRS due reviews
-               + weak-pattern reinforcement
-               + roadmap next-unsolved problem
-               + similar-problem practice
-               + prerequisite bridge problems
-               + diversity and goal matching
-```
+3. **Roadmap-based sequencing**  
+   NeetCode, Striver / TakeUForward, Grind 75, Blind 75 trackers, LeetDaily, and LeetTracker guide users through curated problem lists. Their recommendation style is usually based on a structured sheet, topic order, difficulty progression, and “next unsolved” navigation.
 
----
+4. **Pattern-first learning**  
+   AlgoMonster, NeetCode, and similar roadmap platforms organize learning around reusable problem-solving patterns. Their core recommendation idea is that users should master patterns such as sliding window, binary search, graph traversal, dynamic programming, monotonic stack, and backtracking rather than randomly solving problems.
 
-## 2. Platform-by-platform recommendation strategy analysis
+5. **Session and habit design**  
+   Platforms like LeetDaily, SpaceDSA, Codewars, and LeetReviewer use daily challenges, streaks, review cards, progress bars, ranks, honor points, and session workflows to keep users engaged.
 
-## 2.1 LeetSRS
+6. **Feedback-oriented practice**  
+   Exercism is not DSA-specific, but it is relevant because it uses practice plus mentoring and feedback. Its recommendation inspiration is less about “next LeetCode problem” and more about improving the learner through guided review and feedback loops.
 
-### What it appears to do
+For CrackedIn.io, the most useful strategic takeaway is to combine three recommendation layers:
 
-LeetSRS is a Chrome extension that adds spaced repetition to LeetCode practice. Public pages describe an embedded LeetCode workflow, card rating, review queue building, local-first/no-login storage, stats, streaks, pausing cards, import/export, GitHub Gist sync, and use of a leading scheduling algorithm for review queue building.
-
-### Likely recommendation strategy
-
-LeetSRS is primarily a solved-problem review recommender.
-
-```txt
-Input:
-- Problem saved as a card.
-- User rating after review.
-- Last review timestamp.
-- Scheduler state.
-
-Candidate pool:
-- Problems already added to the user's review deck.
-
-Ranking:
-- Problems due today or overdue appear first.
-- Problems with lower memory stability are scheduled sooner.
-- Problems rated Easy move further out.
-- Problems rated Again/Hard come back sooner.
-
-Output:
-- Daily review queue.
-```
-
-### What CrackedIn.io can learn
-
-Use SRS as the review engine, but do not make users manually create every card. Because CrackedIn.io has LeetCode sync and solved/unsolved sheet status, it can automatically create review cards for solved sheet problems.
-
-Recommended implementation:
-
-```ts
-type RecallRating = "again" | "hard" | "good" | "easy";
-
-interface ReviewCard {
-  userId: string;
-  problemId: string;
-  lastReviewedAt: Date | null;
-  nextReviewAt: Date;
-  ratingHistory: RecallRating[];
-  stability?: number;
-  difficulty?: number;
-  retrievability?: number;
-  paused: boolean;
-}
-```
-
-CrackedIn.io recommendation module:
-
-```txt
-If problem is solved and nextReviewAt <= today:
-  recommend as review.
-If problem is solved but weak pattern is high-risk:
-  recommend earlier review.
-If problem was solved recently with Easy rating:
-  deprioritize review.
-```
+- **Memory layer:** what solved problems should the user review now?
+- **Roadmap layer:** what unsolved problem should the user solve next from a sheet or goal path?
+- **Diagnostic layer:** what weak pattern or topic should the user repair before moving forward?
 
 ---
 
-## 2.2 HashTry
+# Competitor Directory
 
-### What it appears to do
+## 1. LeetSRS
 
-HashTry is positioned as LeetCode analytics plus spaced repetition. Public pages describe an Interview Readiness Score from 0 to 100 based on five signals: solve speed, topic coverage, solution quality, consistency, and self-assessment accuracy. It also references attempt tracking, tiers/grades, weak topics, smart filters, and a Start Solving workflow.
+**Website / Source:**  
+- https://leetsrs.com/  
+- https://github.com/mattcdrake/LeetSRS  
+- https://chromewebstore.google.com/detail/leetsrs/odgfcigkohoimpeeooifjdglncggkgko
 
-### Likely recommendation strategy
+**Summary:**  
+LeetSRS is a Chrome extension that adds spaced repetition directly to LeetCode practice. It is designed to help users review solved problems before they forget the underlying pattern.
 
-HashTry is not just a due-review scheduler. It is closer to a readiness-driven recommender.
+**Recommendation strategy:**  
+LeetSRS recommends problems through a review queue. Users add LeetCode problems as cards, rate their recall/performance, and the system schedules future reviews. Public materials mention TS-FSRS, a spaced-repetition scheduler, as the algorithmic basis.
 
-```txt
-Input:
-- Problems attempted.
-- Time spent.
-- User self-assessment.
-- Quality tier or grade.
-- Topic coverage.
-- Consistency history.
+**Key user flow:**
 
-Candidate pool:
-- Problems from selected lists.
-- Problems that affect weak score components.
-- Reviews that are due or low-confidence.
+1. User solves or adds a LeetCode problem.
+2. Problem becomes a review card.
+3. User rates the card after review.
+4. Scheduler calculates the next review date.
+5. Due cards are surfaced in the extension.
 
-Ranking:
-- Prioritize the score component dragging readiness down.
-- If topic coverage is low, recommend unsolved problems in missing topics.
-- If solve speed is poor, recommend timed re-solves or easier adjacent problems.
-- If quality tier is low, recommend review before new problems.
-- If consistency is low, recommend smaller daily tasks.
+**Notable mechanics:**
 
-Output:
-- Readiness score.
-- Weak topic breakdown.
-- Smart filters and next action.
-```
+- Embedded LeetCode workflow.
+- Review queue based on spaced repetition.
+- Rating-driven scheduling.
+- Local-first behavior and optional sync features.
+- Streaks and stats to reinforce consistency.
 
-### What CrackedIn.io can learn
-
-Build recommendations around readiness gaps, not just due dates.
-
-CrackedIn.io should create a per-topic readiness model:
-
-```ts
-interface TopicReadiness {
-  userId: string;
-  topic: string;
-  coverageScore: number;       // solved relevant problems / expected problems
-  retentionScore: number;      // review pass rate and overdue count
-  speedScore: number;          // solve time normalized by difficulty
-  qualityScore: number;        // unaided solve, code quality, attempts
-  consistencyScore: number;    // recent practice rhythm
-  confidenceCalibration: number; // user confidence vs actual result
-  overall: number;
-}
-```
-
-Recommended formula:
-
-```txt
-readiness_score =
-  0.25 * coverage_score
-+ 0.20 * retention_score
-+ 0.20 * quality_score
-+ 0.15 * speed_score
-+ 0.10 * consistency_score
-+ 0.10 * confidence_calibration
-```
-
-Recommendation behavior:
-
-```txt
-If readiness is low because of coverage:
-  recommend next unsolved sheet problems in that topic.
-
-If readiness is low because of retention:
-  recommend overdue reviews.
-
-If readiness is low because of speed:
-  recommend timed re-solves of already-solved problems.
-
-If readiness is low because confidence is inaccurate:
-  recommend active recall prompts before code.
-```
+**Useful strategic pattern:**  
+For any DSA platform, solved problems should not disappear after completion. They should become memory objects with review due dates, confidence ratings, and recall history.
 
 ---
 
-## 2.3 LeetReviewer
+## 2. HashTry
 
-### What it appears to do
+**Website / Source:**  
+- https://hashtry.io/  
+- https://chromewebstore.google.com/detail/hashtry/oigaclkkebclkjkmhdkemppdefhenknp
 
-LeetReviewer allows users to add problems by URL, auto-fill metadata, import curated lists such as Blind 75, NeetCode 150, and Hot 100, use a try-to-recall workflow, and review problems with spaced repetition.
+**Summary:**  
+HashTry is a LeetCode analytics and spaced-repetition extension focused on helping users understand interview readiness. It tracks LeetCode attempts, reviews, topic coverage, quality, consistency, and self-assessment.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+HashTry uses performance analytics to guide what users should work on next. Its public website describes an Interview Readiness Score from 0 to 100 based on multiple signals, not just solved count.
 
-LeetReviewer combines curated-list import with active recall.
+**Key user flow:**
 
-```txt
-Input:
-- Imported list or manually added problem.
-- Last review date.
-- Review success/failure.
-- Recall note quality or review action.
+1. User practices on LeetCode.
+2. HashTry tracks attempts and outcomes.
+3. User receives quality or readiness signals.
+4. Weak topics and stalled progress become visible.
+5. Review and practice actions are guided by readiness gaps.
 
-Candidate pool:
-- Imported or manually added problems.
+**Notable mechanics:**
 
-Ranking:
-- Problems due by SRS date.
-- Problems where user failed to recall pattern.
-- Problems from imported lists still not reviewed enough.
+- Interview Readiness Score.
+- Topic coverage tracking.
+- Solve-speed trend analysis.
+- Solution quality grading.
+- Consistency signal.
+- Self-assessment accuracy.
+- Weak-area detection.
 
-Output:
-- Review cards that force recall before seeing notes or solution.
-```
-
-### What CrackedIn.io can learn
-
-Before a user re-solves a problem, ask active recall questions:
-
-```txt
-1. What is the core pattern?
-2. What data structure is required?
-3. What invariant must be maintained?
-4. What edge case usually breaks this solution?
-5. What is the time complexity?
-```
-
-Then score the review outcome:
-
-```ts
-interface RecallAttempt {
-  userId: string;
-  problemId: string;
-  recalledPattern: boolean;
-  recalledInvariant: boolean;
-  recalledEdgeCases: boolean;
-  solvedCode: boolean;
-  usedHint: boolean;
-  durationMinutes: number;
-}
-```
-
-Recommendation behavior:
-
-```txt
-If user can recall pattern but cannot implement:
-  recommend same-pattern easier implementation problem.
-
-If user can implement but misses edge cases:
-  recommend edge-case-focused similar problems.
-
-If user cannot recall pattern:
-  reset review interval and recommend a concept recap.
-```
+**Useful strategic pattern:**  
+A strong recommendation system should not only say “solve this next.” It should explain readiness gaps: speed, coverage, quality, consistency, and confidence.
 
 ---
 
-## 2.4 LeetRecall
+## 3. LeetReviewer
 
-### What it appears to do
+**Website / Source:**  
+- https://leetreviewer.com/
 
-LeetRecall's public listing describes zero-setup use, automatic submission tracking, SM-2 spaced repetition, a Due Today popup, dashboard with proficiency badges, acceptance rates, average solve times, reminders, badge counts, and offline/local operation.
+**Summary:**  
+LeetReviewer is a smart review system for LeetCode problems. It focuses on review cards, recall sessions, and spaced repetition across mobile and web.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetReviewer uses review-card workflows. The user reviews coding problems through swipeable cards and recall sessions. The strategy is to make the learner actively remember the problem-solving approach instead of passively reading old solutions.
 
-LeetRecall is auto-capture plus SM-2.
+**Key user flow:**
 
-```txt
-Input:
-- Accepted submissions.
-- Problem attempt history.
-- Acceptance rate.
-- Solve time.
-- SM-2 state.
+1. User adds or imports problems.
+2. Problems become review cards.
+3. User enters recall sessions.
+4. Cards are surfaced based on review timing.
+5. Progress is tracked through repeated recall.
 
-Candidate pool:
-- Solved problems detected automatically.
+**Notable mechanics:**
 
-Ranking:
-- Due today first.
-- Overdue problems before future problems.
-- Lower-proficiency problems before mastered problems.
-- Problems with worse solve-time or acceptance history may get higher priority.
+- Swipeable review cards.
+- Recall-first sessions.
+- Spaced repetition.
+- Mobile and web review access.
+- Review-oriented problem tracking.
 
-Output:
-- Daily review popup and dashboard.
-```
-
-### What CrackedIn.io can learn
-
-Make recommendations automatic. Users should not need to remember to track problems.
-
-CrackedIn.io can do:
-
-```txt
-1. Sync accepted LeetCode problems.
-2. Create review card for every solved sheet problem.
-3. Detect if a user solved a problem outside the sheet and optionally add it.
-4. Show due count in the dashboard.
-5. Send reminders only when due queue is non-empty.
-```
-
-Useful ranking adjustment:
-
-```txt
-review_priority =
-  5 * is_overdue
-+ 2 * days_overdue
-+ 3 * low_proficiency_badge
-+ 2 * slow_recent_solve
-+ 2 * low_acceptance_history
-```
+**Useful strategic pattern:**  
+Recommendation can be framed as a recall exercise, not just a task list. The platform can recommend a problem and ask: “Can you recall the pattern, invariant, edge cases, and complexity?”
 
 ---
 
-## 2.5 AlgoRecall
+## 4. LeetRecall
 
-### What it appears to do
+**Website / Source:**  
+- https://chromewebstore.google.com/detail/leetrecall/lphmfhcelhlgpmijomapaodlmebogmip
 
-AlgoRecall is a local-first spaced-repetition extension for LeetCode-style practice. Public listings describe rating after submit, due reviews, automatic saving of problem title/link, accepted solution code, tags/patterns when available, review history, and next review date.
+**Summary:**  
+LeetRecall is a Chrome extension for hands-free spaced repetition on LeetCode. It aims to help users remember problems they have already solved.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetRecall recommends reviews automatically after detecting or tracking solved problems. It focuses on bringing problems back into the user’s workflow when they are due.
 
-AlgoRecall converts accepted submissions into review cards and updates them with ratings.
+**Key user flow:**
 
-```txt
-Input:
-- Accepted solution.
-- User rating: Again, Hard, Good, Easy.
-- Problem metadata.
-- Review history.
+1. User solves LeetCode problems.
+2. Extension tracks solved items.
+3. Review dates are scheduled.
+4. Due problems appear in the extension/dashboard.
+5. User reviews and updates proficiency.
 
-Candidate pool:
-- Solved problems with review cards.
+**Notable mechanics:**
 
-Ranking:
-- Scheduler due date.
-- Rating severity.
-- Recent failure/lapse.
+- Automatic submission or progress tracking.
+- Due-today review queue.
+- Proficiency-style signals.
+- Offline/local-first positioning.
+- Review reminders.
 
-Output:
-- Scheduled review list.
-```
-
-### What CrackedIn.io can learn
-
-Accepted code is valuable. Store a snapshot of the user's accepted approach when possible and use it in review.
-
-Review UI idea:
-
-```txt
-Step 1: Ask user to recall approach.
-Step 2: Ask user to solve again.
-Step 3: Let user compare with previous accepted code.
-Step 4: Ask rating.
-Step 5: Update next review date.
-```
-
-Data model:
-
-```ts
-interface SolutionSnapshot {
-  userId: string;
-  problemId: string;
-  submittedAt: Date;
-  language: string;
-  codeHash: string;
-  code?: string;
-  runtimeMs?: number;
-  memoryMb?: number;
-  complexityNote?: string;
-}
-```
+**Useful strategic pattern:**  
+Automation matters. Users do not want to manually maintain spreadsheets. A platform should infer as much as possible and ask users only for subjective input such as confidence or difficulty felt.
 
 ---
 
-## 2.6 SpaceDSA
+## 5. AlgoRecall
 
-### What it appears to do
+**Website / Source:**  
+- https://chromewebstore.google.com/detail/algorecall-%E2%80%94-leetcode-spa/hjfjdhpaddkdnjndeaalchgjnimioaln  
+- https://github.com/Ashtam01/AlgoRecall
 
-SpaceDSA tracks LeetCode problem-solving time, automatically schedules reviews, and lets users focus review sessions by problem difficulty and type.
+**Summary:**  
+AlgoRecall is a browser extension for spaced revision of algorithmic problems. Public materials mention support for LeetCode and other competitive-programming sites such as Codeforces, AtCoder, and CodeChef.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+AlgoRecall recommends problems based on post-submit ratings and review schedules. After solving, the user rates the experience, and the extension schedules the next review.
 
-SpaceDSA is session-scoped SRS.
+**Key user flow:**
 
-```txt
-Input:
-- Solved problems.
-- Time spent.
-- Review schedule.
-- Difficulty/type filter selected by user.
+1. Solve and submit a problem.
+2. Rate the problem using labels such as Again, Hard, Good, or Easy.
+3. Store problem metadata, solution, tags, review history, and next review date.
+4. Review when the dashboard says the problem is due.
 
-Candidate pool:
-- Due problems matching selected filters.
+**Notable mechanics:**
 
-Ranking:
-- Due/overdue first.
-- Then difficulty/type match.
-- Then likely memory risk.
+- Post-submit rating.
+- Spaced-repetition scheduling.
+- Multi-platform algorithm-practice support.
+- Local-first behavior.
+- Automatic saving of accepted solution metadata when available.
 
-Output:
-- A filtered review session.
-```
-
-### What CrackedIn.io can learn
-
-Add recommendation modes rather than one generic queue.
-
-Useful modes:
-
-```txt
-- Review due problems only.
-- 30-minute review session.
-- Medium-only practice.
-- Graphs-only practice.
-- Weakest topic session.
-- Next roadmap session.
-- Company-targeted session.
-- Mixed interview simulation.
-```
-
-Session generator:
-
-```ts
-interface SessionRequest {
-  userId: string;
-  minutes: number;
-  mode: "review" | "weak_topic" | "roadmap" | "mixed" | "company";
-  topics?: string[];
-  difficulties?: Array<"Easy" | "Medium" | "Hard">;
-  maxProblems?: number;
-}
-```
+**Useful strategic pattern:**  
+Post-solve rating is one of the most important recommendation signals. It converts a raw solve into a memory-strength estimate.
 
 ---
 
-## 2.7 DSA Spaced Repetition extension
+## 6. SpaceDSA
 
-### What it appears to do
+**Website / Source:**  
+- https://chromewebstore.google.com/detail/spacedsa-leetcode-study-p/phdohlijhchimahmdicclcimgdlcegdd
 
-The public listing describes a multi-platform extension with ratings like Forgot, Hard, Good, Easy; SM-2 scheduling; custom rescheduling; curated lists such as Blind 75, NeetCode 150, and LeetCode 75; daily auto-queuing; per-list problem quotas; topic-wise or random queueing; progress rings; heatmaps; review forecasts; difficulty breakdowns; and topic-wise progress bars.
+**Summary:**  
+SpaceDSA is a LeetCode study planner based on spaced repetition. It emphasizes that users can work with any problem list rather than being locked into one curated sheet.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+SpaceDSA recommends reviews from the user’s own chosen problem list. The core strategy is flexible-list scheduling: users pick or follow any list, and the system handles review timing.
 
-This is a hybrid of SRS plus daily new-problem queueing.
+**Key user flow:**
 
-```txt
-Input:
-- User selected lists.
-- Problems per day per list.
-- Topic preference.
-- SRS state.
-- User rating.
-- Progress per list/topic.
+1. User chooses problems from any list.
+2. Solved problems are scheduled for review.
+3. The system surfaces review tasks over time.
+4. User filters or works through study sessions.
 
-Candidate pools:
-- Due review problems.
-- New problems from selected curated lists.
-- Topic-specific queue.
-- Random queue if user chooses discovery.
+**Notable mechanics:**
 
-Ranking:
-- Due review problems have top priority.
-- New problems are auto-queued based on per-list daily target.
-- Topic mode filters candidates by selected topic.
-- Random mode increases variety.
+- Not tied to a single curated list.
+- Spaced-repetition-based routine.
+- Review filtering by type or difficulty.
+- Study-session framing.
 
-Output:
-- Daily queue containing due reviews and new list problems.
-```
-
-### What CrackedIn.io can learn
-
-Because CrackedIn.io already has a standard sheet, add configurable daily quota:
-
-```txt
-Daily quota examples:
-- 2 reviews + 1 new roadmap problem.
-- 3 reviews + 2 weak-topic problems.
-- 1 review + 1 easy confidence booster + 1 medium stretch.
-```
-
-Daily queue algorithm:
-
-```txt
-1. Fill overdue reviews first.
-2. Fill weak-topic reinforcement second.
-3. Fill next unsolved sheet problems third.
-4. Add one diversity problem if the session is too narrow.
-5. Add one stretch problem only if recent pass rate is high.
-```
+**Useful strategic pattern:**  
+A recommendation engine should work with user-owned lists: NeetCode, Striver, Blind 75, company lists, custom sheets, or imported plans.
 
 ---
 
-## 2.8 leetcode-review open-source tool
+## 7. LeetCycle
 
-### What it appears to do
+**Website / Source:**  
+- https://www.leetcycle.com/
 
-This self-hosted project pulls accepted submissions through LeetCode GraphQL, stores data, and schedules reviews using SM-2.
+**Summary:**  
+LeetCycle is a practice OS for LeetCode spaced repetition. It emphasizes redoing problems and rating confidence after each review.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetCycle recommends review tasks based on confidence and repetition. Every review means the user actually redoes the problem, then logs how it felt.
 
-It is sync-first and scheduler-first.
+**Key user flow:**
 
-```txt
-Input:
-- Accepted LeetCode submissions.
-- Problem metadata.
-- SM-2 state.
+1. User adds a LeetCode URL or problem name.
+2. The problem enters a review loop.
+3. User re-solves the problem during review.
+4. User rates confidence.
+5. The next review is scheduled.
 
-Candidate pool:
-- Accepted problems.
+**Notable mechanics:**
 
-Ranking:
-- SM-2 due date.
+- Confidence-based review loop.
+- Review means active re-solving.
+- Streaks and progress tracking.
+- Lightweight practice operating system.
 
-Output:
-- Self-hosted review schedule.
-```
-
-### What CrackedIn.io can learn
-
-Separate data ingestion from recommendation ranking.
-
-Recommended architecture:
-
-```txt
-LeetCode sync job
-  -> normalized problem table
-  -> user problem status table
-  -> attempt event table
-  -> review scheduler
-  -> recommendation service
-```
-
-This separation lets CrackedIn.io switch from fixed intervals to SM-2 or FSRS later without rewriting sync.
+**Useful strategic pattern:**  
+A high-quality DSA review recommendation should require active solving, not just marking a task as complete.
 
 ---
 
-## 2.9 NeetCode
+## 8. LeetSpace
 
-### What it appears to do
+**Website / Source:**  
+- https://www.leetspace.dev/
 
-NeetCode provides structured problem sets such as NeetCode 150, organized by major DSA categories and difficulty, with progress tracking and video/explanation support. The public NeetCode 150 page shows solved counts, difficulty counts, and topic sections such as Arrays and Hashing, Two Pointers, Sliding Window, Stack, Binary Search, Linked List, Trees, Graphs, Dynamic Programming, Greedy, Intervals, Math, and Bit Manipulation.
+**Summary:**  
+LeetSpace helps users master algorithmic problem solving through spaced repetition, progress tracking, and revision management.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetSpace appears to recommend revisions using an intelligent scheduling system for LeetCode practice. The focus is revision optimization rather than broad content discovery.
 
-NeetCode is roadmap-first.
+**Key user flow:**
 
-```txt
-Input:
-- Curated list.
-- Topic ordering.
-- Difficulty ordering.
-- User solved status.
+1. Track LeetCode progress.
+2. Manage revision items.
+3. Use scheduling to determine what to revisit.
+4. Continue preparation through repeated review.
 
-Candidate pool:
-- Unsolved problems in the roadmap.
+**Notable mechanics:**
 
-Ranking:
-- Topic section order.
-- Problem order inside topic.
-- Difficulty progression.
+- Progress tracking.
+- Revision management.
+- Intelligent scheduling language.
+- Coding-interview preparation focus.
 
-Output:
-- Next problem in selected roadmap section.
-```
-
-### What CrackedIn.io can learn
-
-Your standard sheet should be the default backbone. But it should not be the only ranking signal.
-
-CrackedIn.io enhancement:
-
-```txt
-roadmap_score =
-  1 / (1 + sheet_order_index)
-```
-
-Then combine it with user-specific signals:
-
-```txt
-new_problem_score =
-  0.25 * roadmap_score
-+ 0.25 * weak_pattern_match
-+ 0.20 * difficulty_fit
-+ 0.15 * prerequisite_readiness
-+ 0.10 * similarity_to_recent_learning
-+ 0.05 * diversity_bonus
-```
-
-This means the next sheet problem is recommended unless the user has a more urgent weak area or prerequisite gap.
+**Useful strategic pattern:**  
+Revision should be treated as a first-class object in the product, not an afterthought below the solved-problem list.
 
 ---
 
-## 2.10 AlgoMonster
+## 9. SpacedSmart
 
-### What it appears to do
+**Website / Source:**  
+- https://www.spacedsmart.com/
 
-AlgoMonster emphasizes pattern-based learning. Public pages describe a curriculum of core patterns, hundreds of lessons/problems, algorithm templates, flowcharts for algorithm selection, keyword-to-algorithm tools, runtime-to-algorithm tools, practice lists, speedrun mode, company guides, and stats.
+**Summary:**  
+SpacedSmart positions itself as a science-backed LeetCode spaced-repetition platform. It claims to model a learner’s forgetting curve and predict when review is needed.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+SpacedSmart recommends review timing based on a personalized forgetting-curve idea. It mentions adjusting reviews sooner if the user struggled and later if the user performed well.
 
-AlgoMonster is pattern-first and concept-sequenced.
+**Key user flow:**
 
-```txt
-Input:
-- Pattern curriculum.
-- User progress through lessons.
-- Problem pattern.
-- Difficulty.
-- Algorithm template.
+1. User practices LeetCode problems.
+2. System observes or receives performance signals.
+3. Forgetting risk is estimated.
+4. Problems are recommended for review at predicted useful times.
 
-Candidate pool:
-- Problems belonging to the current or next pattern.
+**Notable mechanics:**
 
-Ranking:
-- Prerequisite concept order.
-- Pattern progression.
-- Difficulty progression.
-- Practice volume required for mastery.
+- Forgetting-curve positioning.
+- Personalized review prediction.
+- Pattern-oriented DSA preparation.
+- Large LeetCode problem coverage.
 
-Output:
-- Next lesson/problem for a pattern.
-- Algorithm decision guidance.
-```
-
-### What CrackedIn.io can learn
-
-Tags like Array, Hash Table, and String are too broad for high-quality recommendations. Build a pattern taxonomy.
-
-Example taxonomy:
-
-```txt
-Array
-  - prefix sum
-  - prefix sum + hashmap
-  - two pointers on sorted array
-  - sliding window fixed size
-  - sliding window variable size
-  - kadane
-  - cyclic sort
-
-Stack
-  - monotonic increasing stack
-  - monotonic decreasing stack
-  - next greater element
-  - histogram boundary expansion
-
-Graph
-  - BFS traversal
-  - BFS shortest path unweighted
-  - DFS connected components
-  - topological sort
-  - union find
-  - Dijkstra
-
-Dynamic Programming
-  - 1D recurrence
-  - 2D grid DP
-  - knapsack
-  - LIS
-  - interval DP
-  - bitmask DP
-```
-
-Pattern-based recommendation:
-
-```txt
-If user solved 1 easy variable-window problem:
-  recommend another variable-window problem with one new constraint.
-
-If user failed binary search on answer:
-  recommend easier monotonic predicate problem before harder ones.
-
-If user repeatedly uses hints on DP state definition:
-  recommend state-definition drills, not random DP problems.
-```
+**Useful strategic pattern:**  
+The recommendation message can be framed around memory risk: “Review now because you are likely to forget this pattern soon.”
 
 ---
 
-## 2.11 Striver SDE Sheet / TakeUForward
+## 10. SpacedLeet
 
-### What it appears to do
+**Website / Source:**  
+- https://spacedleet.vercel.app/
 
-The Striver SDE Sheet page describes a curated set of top coding interview questions, progress tracking, revision, all-problems view, difficulty counts, random problem, and topic sections including arrays, linked lists, greedy, recursion, binary search, heaps, stack/queue, strings, trees, graphs, dynamic programming, and trie.
+**Summary:**  
+SpacedLeet is a spaced-repetition tool for LeetCode interview preparation.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+SpacedLeet recommends review problems at increasing intervals and focuses on keeping previously solved LeetCode problems active in memory.
 
-Striver's sheet is curated-topic progression plus revision/random practice.
+**Key user flow:**
 
-```txt
-Input:
-- Sheet topic section.
-- Problem order.
-- Difficulty.
-- Solved status.
-- Revision flag.
+1. User tracks solved LeetCode problems.
+2. Problems are scheduled for future reviews.
+3. Review queue tells the user what to revisit.
 
-Candidate pool:
-- Unsolved problems in current section.
-- Problems marked for revision.
-- Random problem pool.
+**Notable mechanics:**
 
-Ranking:
-- Sheet order for structured learning.
-- Revision flag for memory refresh.
-- Random mode for variety.
+- Spaced-repetition scheduling.
+- LeetCode-focused prep.
+- Simple review-loop framing.
 
-Output:
-- Next problem, revision problem, or random practice problem.
-```
-
-### What CrackedIn.io can learn
-
-Add three recommendation buttons:
-
-```txt
-1. Continue Sheet
-   - next unsolved problem by sheet order.
-
-2. Revise Weak
-   - solved problems due or low-confidence.
-
-3. Surprise Me
-   - random unsolved problem filtered by appropriate difficulty and weak topic.
-```
-
-Useful rule:
-
-```txt
-Do not use pure random. Use weighted random:
-  40% weak topic
-  30% current sheet topic
-  20% neglected topic
-  10% confidence booster
-```
+**Useful strategic pattern:**  
+Even simple interval-based scheduling creates a strong habit loop when the product clearly shows “due today.”
 
 ---
 
-## 2.12 Grind 75
+## 11. NeetCode
 
-### What it appears to do
+**Website / Source:**  
+- https://neetcode.io/practice/practice/neetcode150  
+- https://neetcode.io/practice
 
-Grind 75 is a customizable coding-interview problem list. Public pages describe customization by available time, difficulty, topics, and a weekly schedule. The listed plan shows weeks, problem counts, estimated minutes, difficulty, and topic visibility.
+**Summary:**  
+NeetCode is a structured coding-interview practice platform known for curated lists such as Blind 75 and NeetCode 150, topic-based roadmaps, and video explanations.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+NeetCode recommends practice through curated topic roadmaps. The NeetCode 150 list is organized into topic sections such as Arrays & Hashing, Two Pointers, Sliding Window, Stack, Binary Search, Linked List, Trees, Heaps, Backtracking, Graphs, Dynamic Programming, Greedy, Intervals, Math, and Bit Manipulation.
 
-Grind 75 is goal/time-constrained planning.
+**Key user flow:**
 
-```txt
-Input:
-- Available weeks or study time.
-- Difficulty preference.
-- Topic preference.
-- Problem list.
+1. User selects a curated roadmap.
+2. Problems are grouped by topic and difficulty.
+3. User works through topic sections.
+4. Progress is tracked by solved count per list/topic.
+5. Explanations and videos support learning.
+
+**Notable mechanics:**
+
+- Curated problem lists.
+- Topic grouping.
+- Difficulty distribution.
+- Progress tracking.
+- Free explanations and video solutions.
+- Core-skills sections for algorithms and data structures.
+
+**Useful strategic pattern:**  
+A recommendation engine should know not only whether a problem is solved, but where it sits in a topic roadmap and what conceptual block it belongs to.
+
+---
+
+## 12. AlgoMonster
+
+**Website / Source:**  
+- https://algo.monster/dashboard  
+- https://algo.monster/landing?t=1
+
+**Summary:**  
+AlgoMonster is a structured coding-interview preparation platform built around algorithmic patterns, templates, guided lessons, and company-focused preparation.
+
+**Recommendation strategy:**  
+AlgoMonster recommends learning by pattern. Instead of browsing thousands of questions randomly, users are guided through reusable patterns, lessons, templates, and progressive problem-solving modules.
+
+**Key user flow:**
+
+1. User follows a structured curriculum.
+2. Patterns are introduced as reusable building blocks.
+3. Problems reinforce those patterns.
+4. AI assistance or progressive unlocking helps the user reach a solution.
+5. Company question banks and speedrun-style practice support targeted prep.
+
+**Notable mechanics:**
+
+- Pattern-first curriculum.
+- Algorithm templates.
+- Progressive solution unlocking.
+- AI-enabled hints and guidance.
+- Company-specific question bank.
+- Interview-ready study timeline.
+
+**Useful strategic pattern:**  
+Recommendations should be based on patterns and subpatterns, not just broad tags. “Sliding window with variable-size constraint” is more actionable than “Array” or “String.”
+
+---
+
+## 13. Striver / TakeUForward SDE Sheet
+
+**Website / Source:**  
+- https://takeuforward.org/dsa/strivers-sde-sheet-top-coding-interview-problems
+
+**Summary:**  
+Striver’s SDE Sheet is a curated list of top coding-interview problems across DSA topics. The sheet is organized by topic sections and includes overall progress, revision, random problem, difficulty, and topic grouping.
+
+**Recommendation strategy:**  
+The recommendation strategy is sheet-driven progression. Users move through handpicked interview problems organized by topic and difficulty, with revision and random-problem options.
+
+**Key user flow:**
+
+1. User opens the SDE Sheet.
+2. Problems are grouped by topic sections.
+3. User solves problems and tracks progress.
+4. Revision and random modes help revisit or vary practice.
+
+**Notable mechanics:**
+
+- Curated interview problem sheet.
+- Topic-based sections.
+- Difficulty labels.
+- Progress tracking.
+- Revision mode.
+- Random problem option.
+
+**Useful strategic pattern:**  
+A good recommendation system can combine strict sheet order with adaptive detours: continue the roadmap, but recommend revision or prerequisite problems when the user is weak.
+
+---
+
+## 14. Grind 75 / Tech Interview Handbook
+
+**Website / Source:**  
+- https://www.techinterviewhandbook.org/grind75/  
+- https://github.com/yangshun/tech-interview-handbook
+
+**Summary:**  
+Grind 75 is a curated coding-interview question list by Yangshun Tay, positioned as an improved and customizable evolution of Blind 75.
+
+**Recommendation strategy:**  
+Grind 75 recommends problems through customization. Users can adjust available time, difficulty, topics, and other constraints to generate a suitable study plan.
+
+**Key user flow:**
+
+1. User chooses interview-prep constraints such as time and topics.
+2. The platform generates or displays a plan.
+3. Problems are ordered across weeks and difficulty levels.
+4. User follows the sequence and tracks completion.
+
+**Notable mechanics:**
+
+- Curated core list.
+- Customizable plan generation.
+- Weekly sequencing.
+- Topic and difficulty controls.
 - Estimated time per problem.
 
-Candidate pool:
-- Curated interview problems.
-
-Ranking:
-- Maximize interview coverage under time constraints.
-- Place easier/foundational problems earlier.
-- Spread topics across weeks.
-- Include estimated time budget.
-
-Output:
-- Weekly plan.
-```
-
-### What CrackedIn.io can learn
-
-Add a deadline-aware planner:
-
-```txt
-User input:
-- Interview date: 30 days away.
-- Daily time: 60 minutes.
-- Goal: backend SWE interview.
-
-CrackedIn output:
-- Week 1: arrays, hashing, two pointers, basic trees.
-- Week 2: graphs, binary search, stack.
-- Week 3: DP, intervals, heaps.
-- Week 4: reviews, mocks, weakest topics.
-```
-
-Deadline formula:
-
-```txt
-weekly_capacity_minutes = days_available_per_week * minutes_per_day
-problem_cost = estimated_solve_time + estimated_review_time
-select problems that maximize:
-  interview_frequency + weakness_relevance + prerequisite_value
-subject to:
-  total_cost <= capacity
-```
+**Useful strategic pattern:**  
+Recommendations should adapt to user constraints: interview date, available hours per week, preferred topics, and difficulty tolerance.
 
 ---
 
-## 2.13 LeetDaily
+## 15. LeetDaily
 
-### What it appears to do
+**Website / Source:**  
+- https://leetdaily.masst.dev/  
+- https://leetdaily.masst.dev/blog/blind-75-vs-neetcode-150-vs-leetcode-75
 
-LeetDaily tracks daily LeetCode challenges and curated DSA sheets. Its public page describes progress bars, sequential next-unsolved problems, problem metadata, solved status, and countdown timer for the daily challenge.
+**Summary:**  
+LeetDaily is a LeetCode interview-prep and tracker extension with daily challenge support and curated sheet tracking.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetDaily recommends through daily prompts and next-unsolved navigation. It tracks multiple curated sheets and helps users continue from where they left off.
 
-LeetDaily is habit-first and sequential-list-first.
+**Key user flow:**
 
-```txt
-Input:
-- Daily challenge.
-- Selected curated sheets.
-- Solved status.
-- Progress per sheet.
+1. User sees today’s LeetCode daily challenge.
+2. User tracks curated sheets such as Blind 75, NeetCode 150, LeetCode 75, Namaste DSA, Fraz DSA, and Striver SDE Sheet.
+3. Progress bars show completion.
+4. Sequential next-unsolved navigation points users forward.
+5. Focus streaks encourage consistency.
 
-Candidate pool:
-- Today's challenge.
-- Next unsolved problem from each sheet.
+**Notable mechanics:**
 
-Ranking:
-- Daily challenge gets time-sensitive priority.
-- Sequential next-unsolved keeps roadmap progress simple.
-- Progress bars motivate completion.
+- Daily challenge card.
+- Multi-sheet tracking.
+- Progress bars.
+- Sequential next-unsolved recommendation.
+- Focus streaks.
+- Difficulty, acceptance, topic, and company tags.
 
-Output:
-- Today's challenge.
-- Next unsolved sheet problem.
-```
-
-### What CrackedIn.io can learn
-
-Add a habit layer:
-
-```txt
-Today tab:
-- 1 daily challenge or warm-up.
-- 2 due reviews.
-- 1 next unsolved sheet problem.
-- 1 weak-topic reinforcement.
-```
-
-Progress UI:
-
-```txt
-Sheet Progress: 47/150
-Today Due: 6
-Weakest Topic: Graph BFS
-Next Best Problem: Rotting Oranges
-```
+**Useful strategic pattern:**  
+“Next unsolved” is a simple but powerful recommendation. It becomes stronger when combined with multiple list memberships and streak-building.
 
 ---
 
-## 2.14 Codewars
+## 16. LeetTracker
 
-### What it appears to do
+**Website / Source:**  
+- https://www.leettracker.com/problems
 
-Codewars uses gamification with ranks and honor. Documentation explains that kata difficulty affects rank progress and that completing harder kata around or above the user's rank moves rank more meaningfully than repeatedly doing low-level kata. Honor reflects broader activity and contribution.
+**Summary:**  
+LeetTracker is a free LeetCode progress tracker that organizes problems by topic, difficulty, and curated lists such as NeetCode 150, Grind 75, and Blind 75.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+LeetTracker recommends discovery through filters and curated-list organization. The user can browse problems by topic, difficulty, and sheet membership, then track completion.
 
-Codewars encourages difficulty-relative progression.
+**Key user flow:**
 
-```txt
-Input:
-- User rank.
-- Kata rank/difficulty.
-- Completed kata.
-- Language or skill area.
+1. User opens a curated problem directory.
+2. Problems are grouped by lists, topics, and difficulty.
+3. User filters and marks progress.
+4. The tracker visualizes strengths and streaks.
 
-Candidate pool:
-- Unsolved kata.
+**Notable mechanics:**
 
-Ranking:
-- Problems near user rank.
-- Slightly harder problems for rank growth.
-- Easier problems for warm-up or activity.
+- Curated problem directory.
+- Topic and difficulty filters.
+- Progress tracking.
+- Streak support.
+- Multi-list coverage.
 
-Output:
-- Practice items that progress rank and activity.
-```
-
-### What CrackedIn.io can learn
-
-Add pattern XP and levels.
-
-Example:
-
-```txt
-Sliding Window Level 1:
-- fixed window max/min
-
-Sliding Window Level 2:
-- variable window with set/map
-
-Sliding Window Level 3:
-- frequency constraint
-
-Sliding Window Level 4:
-- minimum window / multiple counters
-```
-
-Recommendation behavior:
-
-```txt
-If user is Level 2 in Graph BFS:
-  recommend Level 2 consolidation or Level 3 stretch.
-
-If user keeps solving only Level 1 array problems:
-  reduce XP reward and recommend harder or more diverse problems.
-```
+**Useful strategic pattern:**  
+Good recommendations need a clean problem catalog with metadata: topic, difficulty, list membership, and user completion state.
 
 ---
 
-## 2.15 Exercism
+## 17. FleetCode
 
-### What it appears to do
+**Website / Source:**  
+- https://www.talentd.in/fleetcode/sheets
 
-Exercism combines learning, practice, automated analysis, and mentoring. Public docs emphasize mentoring workflows and feedback.
+**Summary:**  
+FleetCode provides DSA sheets such as Blind 75, NeetCode 150, NeetCode 250, Striver SDE Sheet, Grind 75, and LeetCode 75.
 
-### Likely recommendation strategy
+**Recommendation strategy:**  
+FleetCode recommends practice through curated sheet selection. Users can choose the sheet that matches their preparation level and follow its problem set.
 
-Exercism is feedback-loop-driven learning.
+**Key user flow:**
 
-```txt
-Input:
-- Submitted solution.
-- Automated analysis.
-- Mentor feedback.
-- Exercise track progression.
+1. User selects a curated sheet.
+2. The platform presents problem counts and sheet information.
+3. User starts a selected path.
+4. Progress is tracked against that sheet.
 
-Candidate pool:
-- Next exercises.
-- Exercises needing feedback or revision.
+**Notable mechanics:**
 
-Ranking:
-- Concepts not mastered.
-- Solutions needing revision.
-- Next exercise in track.
+- Multiple official and community sheets.
+- Problem counts per sheet.
+- Sheet-level positioning.
+- User selection of preparation path.
 
-Output:
-- Continue, revise, or request feedback.
-```
-
-### What CrackedIn.io can learn
-
-Use feedback quality as a recommendation signal.
-
-Example:
-
-```txt
-If user solves but code is O(n^2) where O(n) is expected:
-  recommend optimization review.
-
-If user misses edge cases:
-  recommend edge-case drill.
-
-If user solves correctly but cannot explain:
-  recommend active recall explanation task.
-```
-
-AI feedback object:
-
-```ts
-interface SolveFeedback {
-  problemId: string;
-  userId: string;
-  correctness: "unknown" | "failed" | "passed";
-  patternIdentified: boolean;
-  optimalComplexity: boolean;
-  edgeCasesCovered: boolean;
-  implementationQuality: 1 | 2 | 3 | 4 | 5;
-  explanationQuality: 1 | 2 | 3 | 4 | 5;
-  recommendedAction: "review" | "similar_easy" | "similar_medium" | "optimize" | "move_on";
-}
-```
+**Useful strategic pattern:**  
+A platform can recommend the right sheet before recommending the right problem. Beginners, intermediates, and interview-ready users may need different roadmaps.
 
 ---
 
-# 3. Unified recommendation system for CrackedIn.io
+## 18. Codewars
 
-## 3.1 Recommendation types
+**Website / Source:**  
+- https://docs.codewars.com/gamification/  
+- https://docs.codewars.com/gamification/ranks/  
+- https://docs.codewars.com/gamification/honor/
 
-CrackedIn.io should show recommendations in separate lanes, because users have different intentions at different times.
+**Summary:**  
+Codewars is a programming-practice platform based on kata, ranks, honor, community solutions, and gamified progression.
 
-```txt
-1. Review Now
-   Solved problems that are due or likely to be forgotten.
+**Recommendation strategy:**  
+Codewars guides users through difficulty-ranked kata and gamified progression. Users level up by solving kata, and the platform uses ranks and honor to represent skill and community contribution.
 
-2. Next Best Unsolved
-   Best unsolved problem from the user's standard sheet.
+**Key user flow:**
 
-3. Weak Pattern Drill
-   Problems that target the user's weakest patterns.
+1. User solves kata.
+2. Solves contribute to rank progress.
+3. Harder kata provide more rank progress.
+4. Community actions contribute to honor.
+5. Progression creates motivation to continue.
 
-4. Similar Practice
-   Problems similar to the current/recent problem.
+**Notable mechanics:**
 
-5. Bridge Problem
-   Easier prerequisite before a hard target problem.
+- Kyu/dan rank system.
+- Honor points.
+- Kata difficulty progression.
+- Community voting and contribution signals.
+- Skill progression through completion.
 
-6. Timed Practice
-   Problems that fit the user's available time.
-
-7. Interview Readiness Plan
-   Mixed plan based on target date/company/topic.
-```
-
----
-
-## 3.2 Data inputs
-
-Use three kinds of signals.
-
-### A. Objective signals from LeetCode sync
-
-```txt
-- Solved status.
-- Accepted submissions.
-- Last accepted date.
-- Submission count if available.
-- Language if available.
-- Runtime/memory if available.
-- Problem difficulty.
-- Problem tags.
-```
-
-### B. Sheet signals
-
-```txt
-- Sheet membership.
-- Sheet order index.
-- Topic section.
-- Difficulty distribution.
-- Prerequisite relationship.
-- Whether problem is core, optional, or stretch.
-```
-
-### C. User behavior signals
-
-```txt
-- Confidence rating.
-- Recall rating.
-- Hint usage.
-- Editorial usage.
-- Solve time.
-- Failed reviews.
-- Skipped recommendations.
-- Problem bookmarks.
-- Target company or interview date.
-```
+**Useful strategic pattern:**  
+Gamification can turn recommendations into progression goals: “solve two graph BFS problems to reach Graph Level 3” or “complete one hard review to advance your DP mastery.”
 
 ---
 
-## 3.3 Problem model
+## 19. Exercism
 
-```ts
-interface Problem {
-  id: string;
-  leetcodeSlug: string;
-  title: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  officialTags: string[];
-  patternTags: string[];
-  subpatterns: string[];
-  sheetIds: string[];
-  sheetOrder: Record<string, number>;
-  estimatedMinutes: number;
-  prerequisiteProblemIds: string[];
-  similarProblemIds: string[];
-  contrastProblemIds: string[];
-  isPremium?: boolean;
-}
-```
+**Website / Source:**  
+- https://exercism.org/docs  
+- https://exercism.org/docs/mentoring
 
-## 3.4 User problem state
+**Summary:**  
+Exercism is a programming-practice and mentorship platform. It supports many programming languages and emphasizes practice, feedback, and mentoring.
 
-```ts
-interface UserProblemState {
-  userId: string;
-  problemId: string;
-  status: "unsolved" | "attempted" | "solved" | "reviewing" | "mastered";
-  firstSolvedAt?: Date;
-  lastAttemptAt?: Date;
-  lastReviewedAt?: Date;
-  nextReviewAt?: Date;
-  reviewStage: number;
-  recallRating?: "again" | "hard" | "good" | "easy";
-  confidence: 1 | 2 | 3 | 4 | 5;
-  personalDifficulty: 1 | 2 | 3 | 4 | 5;
-  attemptsCount: number;
-  failedAttemptsCount: number;
-  hintUsedCount: number;
-  editorialUsedCount: number;
-  avgSolveTimeMinutes?: number;
-  lastSolveTimeMinutes?: number;
-  reviewLapses: number;
-  skippedCount: number;
-}
-```
+**Recommendation strategy:**  
+Exercism recommends learning through practice tracks, exercises, mentoring, and feedback. Its strongest lesson for DSA platforms is the feedback loop: users improve when their work is reviewed and they receive guidance, not just when they solve more problems.
+
+**Key user flow:**
+
+1. User chooses a language track.
+2. User solves exercises.
+3. User may receive automated or mentor feedback.
+4. Feedback helps refine understanding and code quality.
+5. User progresses through more exercises.
+
+**Notable mechanics:**
+
+- Practice tracks.
+- Exercise progression.
+- Mentoring workflow.
+- Feedback culture.
+- Community contribution.
+
+**Useful strategic pattern:**  
+A coding platform can recommend not only problems but feedback actions: “review your previous solution,” “compare approaches,” “ask for feedback,” or “refactor for clarity.”
 
 ---
 
-# 4. Candidate generation
+## 20. StudyCards AI
 
-Do not ask an AI model to directly pick one problem from the entire database. First generate candidates from focused pools.
+**Website / Source:**  
+- https://studycardsai.com/blog/spaced-repetition-for-leetcode
 
-## 4.1 Pool A: due reviews
+**Summary:**  
+StudyCards AI discusses using spaced repetition for LeetCode by turning solved problems into review cards. It frames the method as remembering patterns rather than memorizing full code.
 
-```txt
-Candidate if:
-- status is solved/reviewing/mastered
-- nextReviewAt <= today
-```
+**Recommendation strategy:**  
+The recommended learning flow is card-based review. A problem becomes a prompt for recalling the high-level approach, pattern, and solution reasoning.
 
-Priority:
+**Key user flow:**
 
-```txt
-review_due_score =
-  3.0 * days_overdue
-+ 2.0 * low_confidence
-+ 2.0 * recent_hint_usage
-+ 3.0 * review_lapses
-+ 1.5 * weak_pattern_risk
-+ 1.0 * slow_solve_time
-```
+1. User solves a LeetCode problem.
+2. A review card is created.
+3. The front prompts recall of the problem or pattern.
+4. The back contains the approach and link to solution.
+5. Reviews occur at increasing intervals.
 
-## 4.2 Pool B: weak-pattern unsolved problems
+**Notable mechanics:**
 
-```txt
-Candidate if:
-- status is unsolved or attempted
-- problem pattern is in user's weak pattern list
-- prerequisites are mostly satisfied
-```
+- Problem-to-card conversion.
+- Pattern recall rather than code memorization.
+- Increasing review intervals.
+- Lightweight Anki-style workflow.
 
-Priority:
-
-```txt
-weak_unsolved_score =
-  4.0 * pattern_weakness
-+ 2.0 * difficulty_fit
-+ 2.0 * prerequisite_readiness
-+ 1.5 * sheet_relevance
-+ 1.0 * recent_related_learning
-```
-
-## 4.3 Pool C: roadmap next problems
-
-```txt
-Candidate if:
-- problem is in selected standard sheet
-- status is unsolved
-```
-
-Priority:
-
-```txt
-roadmap_score = 1 / (1 + sheet_order_index)
-```
-
-Boost if current section is partially completed:
-
-```txt
-section_momentum_bonus = solved_in_section / total_in_section
-```
-
-## 4.4 Pool D: similar problems
-
-```txt
-Candidate if:
-- shares pattern/subpattern with current problem
-- not solved too recently
-- not too far outside user's difficulty range
-```
-
-Priority:
-
-```txt
-similarity_score =
-  0.30 * shared_subpattern
-+ 0.20 * shared_data_structure
-+ 0.15 * shared_solution_template
-+ 0.15 * constraint_shape_similarity
-+ 0.10 * difficulty_fit
-+ 0.10 * novelty
-```
-
-## 4.5 Pool E: prerequisite bridge problems
-
-```txt
-Candidate if:
-- unsolved target problem is too hard
-- candidate is a prerequisite or easier same-pattern problem
-```
-
-Priority:
-
-```txt
-bridge_score =
-  4.0 * prerequisite_value
-+ 2.0 * target_problem_importance
-+ 2.0 * difficulty_accessibility
-+ 1.0 * pattern_overlap
-```
-
-## 4.6 Pool F: diversity problems
-
-```txt
-Candidate if:
-- topic has low recent practice
-- not already overloaded in today's plan
-```
-
-Priority:
-
-```txt
-diversity_score =
-  3.0 * topic_neglect
-+ 1.5 * sheet_relevance
-+ 1.0 * difficulty_fit
-```
+**Useful strategic pattern:**  
+Recommendation content should ask users to remember the problem-solving idea, not the exact code.
 
 ---
 
-# 5. Final ranking
+# Recommendation Strategy Themes to Extract
 
-## 5.1 Review recommendation score
+## Theme 1: Review due/overdue solved problems
 
-Use this for solved problems.
+Observed in: LeetSRS, LeetRecall, AlgoRecall, SpaceDSA, LeetCycle, LeetSpace, SpacedSmart, SpacedLeet.
 
-```txt
-review_recommendation_score =
-  0.35 * due_urgency
-+ 0.20 * memory_risk
-+ 0.15 * pattern_weakness
-+ 0.10 * confidence_gap
-+ 0.10 * solve_quality_risk
-+ 0.05 * goal_relevance
-+ 0.05 * diversity_need
-- 0.20 * recently_reviewed_penalty
-```
+**Mechanism:**  
+Solved problems are converted into review items. Each item has a next review date. The system surfaces due or overdue problems.
 
-Where:
+**Signals used or implied:**
 
-```txt
-due_urgency:
-  1.0 if overdue, scaled by days overdue.
-
-memory_risk:
-  High if last rating was Again/Hard, low if Easy.
-
-pattern_weakness:
-  High if user struggles with the problem's pattern.
-
-confidence_gap:
-  High if confidence is low or confidence is inaccurate.
-
-solve_quality_risk:
-  High if solved with hints/editorial or too slowly.
-
-recently_reviewed_penalty:
-  Prevents recommending the same problem too often.
-```
-
-## 5.2 New problem recommendation score
-
-Use this for unsolved problems.
-
-```txt
-new_problem_recommendation_score =
-  0.25 * sheet_priority
-+ 0.20 * weak_pattern_match
-+ 0.20 * difficulty_fit
-+ 0.15 * prerequisite_readiness
-+ 0.10 * recent_learning_similarity
-+ 0.05 * diversity_bonus
-+ 0.05 * goal_relevance
-- 0.20 * too_hard_penalty
-- 0.10 * repeated_topic_penalty
-```
-
-## 5.3 Similar problem score
-
-Use this on problem detail pages.
-
-```txt
-similar_problem_score =
-  0.30 * same_subpattern
-+ 0.20 * same_core_template
-+ 0.15 * same_data_structure
-+ 0.15 * difficulty_progression_fit
-+ 0.10 * sheet_or_company_relevance
-+ 0.10 * novelty
-```
-
-Return similar problems in four buckets:
-
-```txt
-1. Easier prerequisite.
-2. Same pattern practice.
-3. Harder follow-up.
-4. Same pattern but different surface story.
-```
-
-Example:
-
-```txt
-Current problem: Daily Temperatures
-
-Easier prerequisite:
-- Next Greater Element I
-
-Same pattern:
-- Online Stock Span
-
-Harder follow-up:
-- Largest Rectangle in Histogram
-
-Different-looking same pattern:
-- Remove K Digits
-```
-
----
-
-# 6. Daily plan strategy
-
-A good daily plan should not be only reviews and should not be only new problems.
-
-## 6.1 Default daily plan
-
-```txt
-50% due reviews
-25% weak-topic reinforcement
-15% next roadmap problem
-10% confidence booster or stretch problem
-```
-
-Example:
-
-```txt
-Today's CrackedIn Plan
-
-1. Review: Longest Substring Without Repeating Characters
-   Reason: due today, variable sliding window, last rating Hard.
-
-2. Review: Product of Array Except Self
-   Reason: overdue by 3 days, prefix-product pattern appears in your weak list.
-
-3. Weak drill: Permutation in String
-   Reason: same sliding window family but adds frequency matching.
-
-4. Next sheet problem: Koko Eating Bananas
-   Reason: next unsolved Binary Search problem in your sheet.
-
-5. Confidence booster: Valid Palindrome
-   Reason: quick two-pointer warm-up to keep streak active.
-```
-
-## 6.2 Beginner daily plan
-
-```txt
-60% roadmap next
-25% easy reviews
-15% concept recap
-```
-
-## 6.3 Interview-in-30-days plan
-
-```txt
-40% weak topics
-30% due reviews
-20% medium/hard mixed practice
-10% timed mock
-```
-
-## 6.4 Burnout-safe plan
-
-If user skipped several days:
-
-```txt
-- Recommend fewer problems.
-- Prefer easy/medium reviews.
-- Avoid hard stretch problems immediately.
-- Show a restart plan, not a guilt dashboard.
-```
-
----
-
-# 7. Weak pattern detection
-
-## 7.1 Signals
-
-A topic is weak if:
-
-```txt
-- User has low solve rate in that pattern.
-- User has high hint/editorial usage.
-- User's average solve time is high.
-- User failed recent reviews.
-- User skips recommendations in that pattern.
-- User confidence is low.
-- User confidence is high but actual results are poor.
-```
-
-## 7.2 Formula
-
-```txt
-pattern_weakness_score =
-  0.25 * failure_rate
-+ 0.20 * hint_usage_rate
-+ 0.15 * review_lapse_rate
-+ 0.15 * slow_solve_rate
-+ 0.10 * low_confidence_rate
-+ 0.10 * low_coverage
-+ 0.05 * skip_rate
-```
-
-## 7.3 Output
-
-```txt
-Weakest patterns:
-1. Binary Search on Answer - 78/100 weakness
-2. 1D Dynamic Programming - 72/100 weakness
-3. Graph BFS Shortest Path - 66/100 weakness
-4. Monotonic Stack - 61/100 weakness
-```
-
-Then connect each weak pattern to concrete recommendations:
-
-```txt
-Binary Search on Answer:
-- Review: Capacity To Ship Packages Within D Days
-- Bridge: First Bad Version
-- New: Koko Eating Bananas
-- Stretch: Split Array Largest Sum
-```
-
----
-
-# 8. Similar problem recommendation design
-
-## 8.1 Do not rely only on LeetCode tags
-
-Bad:
-
-```txt
-Problem A has tag Array.
-Problem B has tag Array.
-Therefore they are similar.
-```
-
-Good:
-
-```txt
-Problem A uses prefix sum + hashmap to count target subarrays.
-Problem B uses prefix sum + hashmap to detect repeated remainder.
-They are similar because the invariant is the same.
-```
-
-## 8.2 Similarity dimensions
-
-```txt
-- Core pattern.
-- Subpattern.
-- Data structure.
-- Invariant.
-- Constraint shape.
-- Difficulty delta.
-- Implementation template.
-- Edge cases.
-- Sheet/company relevance.
-```
-
-## 8.3 Explanation template
-
-```txt
-Recommended because:
-- It uses the same core pattern: {pattern}.
-- It adds one new constraint: {constraint}.
-- Your last review in this pattern was rated {rating}.
-- It is {difficulty} and should take about {estimatedMinutes} minutes.
-```
-
-## 8.4 Similar-problem buckets
-
-```txt
-For every problem page, show:
-
-- Prerequisite problem
-- Same-pattern problem
-- Harder follow-up
-- Contrast problem
-```
-
-A contrast problem is important. It teaches users not to overfit.
-
-Example:
-
-```txt
-Current: Subarray Sum Equals K
-Same pattern: Continuous Subarray Sum
-Contrast: Two Sum
-Reason: Both use hash maps, but one uses prefix sums and one uses direct complements.
-```
-
----
-
-# 9. Readiness score strategy
-
-## 9.1 Overall readiness
-
-```txt
-overall_readiness =
-  0.25 * topic_coverage
-+ 0.20 * review_health
-+ 0.20 * unaided_solve_quality
-+ 0.15 * solve_speed
-+ 0.10 * consistency
-+ 0.10 * confidence_calibration
-```
-
-## 9.2 Topic readiness
-
-```txt
-Topic: Graphs
-Coverage: 42/100
-Review Health: 55/100
-Solve Quality: 38/100
-Speed: 44/100
-Consistency: 70/100
-Confidence Calibration: 50/100
-Overall: 48/100
-```
-
-Recommendation:
-
-```txt
-Graphs are not interview-ready yet.
-Recommended actions:
-1. Review Number of Islands.
-2. Solve Rotting Oranges.
-3. Bridge to Course Schedule.
-4. Avoid Word Ladder until BFS shortest path is stable.
-```
-
-## 9.3 Readiness-driven CTAs
-
-```txt
-If coverage is low:
-  CTA = Solve new problems.
-
-If review health is low:
-  CTA = Clear due reviews.
-
-If solve quality is low:
-  CTA = Re-solve without hints.
-
-If speed is low:
-  CTA = Timed practice.
-
-If consistency is low:
-  CTA = Smaller daily plan.
-
-If confidence calibration is low:
-  CTA = Active recall quiz.
-```
-
----
-
-# 10. AI usage strategy
-
-AI should explain and classify. It should not be the only recommender.
-
-## 10.1 Recommended AI roles
-
-```txt
-Good AI use:
-- Classify problem pattern and subpattern.
-- Generate spoiler-free hints.
-- Explain why a recommendation was chosen.
-- Compare two similar problems.
-- Generate active recall questions.
-- Summarize user's weak pattern.
-
-Risky AI use:
-- Directly choosing all recommendations without deterministic ranking.
-- Inventing LeetCode metadata.
-- Suggesting premium-only problems without checking access.
-- Giving full solutions when the user asked for hints.
-```
-
-## 10.2 AI explanation prompt
-
-```txt
-You are explaining a coding-practice recommendation.
-Do not give code.
-Do not reveal the full solution.
-Use plain text.
-
-User context:
-- Weak patterns: {weakPatterns}
-- Recent solved problems: {recentSolved}
-- Due reviews: {dueReviews}
-- Target sheet: {sheetName}
-
-Recommended problem:
-- Title: {title}
-- Difficulty: {difficulty}
-- Pattern: {pattern}
-- Reason signals: {signals}
-
-Write:
-1. Why this problem is recommended.
-2. What concept it reinforces.
-3. One spoiler-free hint.
-4. What to do after solving it.
-```
-
-## 10.3 AI classification prompt
-
-```txt
-Classify this LeetCode problem for a recommendation engine.
-Return JSON only.
-
-Problem:
-{title}
-{description}
-{constraints}
-
-Return:
-{
-  "primaryPattern": "",
-  "subpatterns": [],
-  "dataStructures": [],
-  "prerequisites": [],
-  "similarProblemTypes": [],
-  "commonMistakes": [],
-  "difficultyDrivers": [],
-  "spoilerFreeHint": ""
-}
-```
-
----
-
-# 11. Database schema idea
-
-## 11.1 Core tables
-
-```sql
-CREATE TABLE problems (
-  id TEXT PRIMARY KEY,
-  leetcode_slug TEXT UNIQUE NOT NULL,
-  title TEXT NOT NULL,
-  difficulty TEXT NOT NULL,
-  estimated_minutes INTEGER,
-  is_premium BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE problem_patterns (
-  problem_id TEXT NOT NULL,
-  pattern TEXT NOT NULL,
-  subpattern TEXT,
-  weight REAL DEFAULT 1.0,
-  PRIMARY KEY (problem_id, pattern, subpattern)
-);
-
-CREATE TABLE sheets (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT
-);
-
-CREATE TABLE sheet_problems (
-  sheet_id TEXT NOT NULL,
-  problem_id TEXT NOT NULL,
-  order_index INTEGER NOT NULL,
-  section TEXT,
-  is_core BOOLEAN DEFAULT TRUE,
-  PRIMARY KEY (sheet_id, problem_id)
-);
-
-CREATE TABLE user_problem_states (
-  user_id TEXT NOT NULL,
-  problem_id TEXT NOT NULL,
-  status TEXT NOT NULL,
-  first_solved_at TIMESTAMP,
-  last_attempt_at TIMESTAMP,
-  last_reviewed_at TIMESTAMP,
-  next_review_at TIMESTAMP,
-  review_stage INTEGER DEFAULT 0,
-  confidence INTEGER,
-  personal_difficulty INTEGER,
-  attempts_count INTEGER DEFAULT 0,
-  failed_attempts_count INTEGER DEFAULT 0,
-  hint_used_count INTEGER DEFAULT 0,
-  editorial_used_count INTEGER DEFAULT 0,
-  avg_solve_time_minutes REAL,
-  review_lapses INTEGER DEFAULT 0,
-  skipped_count INTEGER DEFAULT 0,
-  PRIMARY KEY (user_id, problem_id)
-);
-
-CREATE TABLE recommendation_events (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  problem_id TEXT NOT NULL,
-  recommendation_type TEXT NOT NULL,
-  score REAL NOT NULL,
-  reason_json TEXT NOT NULL,
-  shown_at TIMESTAMP NOT NULL,
-  clicked_at TIMESTAMP,
-  skipped_at TIMESTAMP,
-  completed_at TIMESTAMP
-);
-```
-
----
-
-# 12. Recommendation service pseudocode
-
-```ts
-async function getDailyRecommendations(userId: string): Promise<Recommendation[]> {
-  const user = await getUserProfile(userId);
-  const states = await getUserProblemStates(userId);
-  const problems = await getProblemsForSelectedSheet(user.selectedSheetId);
-  const weakPatterns = calculateWeakPatterns(states, problems);
-
-  const dueReviews = generateDueReviewCandidates(user, states, problems, weakPatterns);
-  const weakDrills = generateWeakPatternCandidates(user, states, problems, weakPatterns);
-  const roadmapNext = generateRoadmapCandidates(user, states, problems);
-  const diversity = generateDiversityCandidates(user, states, problems);
-
-  const rankedReviews = rankReviewCandidates(dueReviews);
-  const rankedNew = rankNewProblemCandidates([
-    ...weakDrills,
-    ...roadmapNext,
-    ...diversity,
-  ]);
-
-  return buildBalancedPlan({
-    reviews: rankedReviews,
-    newProblems: rankedNew,
-    userCapacityMinutes: user.dailyCapacityMinutes ?? 60,
-    maxItems: user.maxDailyProblems ?? 5,
-  });
-}
-```
-
-Balanced plan builder:
-
-```ts
-function buildBalancedPlan(input: {
-  reviews: Recommendation[];
-  newProblems: Recommendation[];
-  userCapacityMinutes: number;
-  maxItems: number;
-}) {
-  const plan: Recommendation[] = [];
-
-  plan.push(...input.reviews.slice(0, 2));
-  plan.push(...input.newProblems.filter(r => r.type === "weak_drill").slice(0, 1));
-  plan.push(...input.newProblems.filter(r => r.type === "roadmap_next").slice(0, 1));
-
-  if (plan.length < input.maxItems) {
-    plan.push(...input.newProblems.filter(r => r.type === "confidence_booster").slice(0, 1));
-  }
-
-  return dedupeAndFitTime(plan, input.userCapacityMinutes, input.maxItems);
-}
-```
-
----
-
-# 13. Recommendation explanation examples
-
-## 13.1 Due review explanation
-
-```txt
-Review this today because it is overdue by 4 days and your last rating was Hard. It also belongs to Sliding Window, which is currently one of your weakest patterns.
-```
-
-## 13.2 Next unsolved explanation
-
-```txt
-This is the next unsolved problem in your selected sheet, and it fits your current level. You have solved the prerequisite two-pointer problems, but still need more practice with variable-size windows.
-```
-
-## 13.3 Weak drill explanation
-
-```txt
-Recommended as a weak-topic drill because your recent Graph BFS problems required hints. This problem reinforces BFS traversal without adding the extra complexity of shortest-path reconstruction.
-```
-
-## 13.4 Bridge explanation
-
-```txt
-This is a bridge problem before Word Ladder. It teaches BFS level-order expansion on a grid, which is easier than BFS over generated word states.
-```
-
-## 13.5 Similar problem explanation
-
-```txt
-Recommended because it uses the same prefix-sum idea, but changes the goal from finding a target sum to counting valid subarrays. Focus on what the hashmap stores before coding.
-```
-
----
-
-# 14. MVP recommendation system for CrackedIn.io
-
-## MVP inputs
-
-```txt
-- Synced solved/unsolved status.
-- Standard sheet order.
-- Difficulty.
-- Topic/pattern tags.
 - Last solved date.
-- Manual confidence rating.
-- Manual review rating.
-```
+- Last reviewed date.
+- User confidence.
+- User rating.
+- Pass/fail outcome.
+- Difficulty felt by the user.
+- Forgetting risk.
 
-## MVP outputs
+---
 
-```txt
+## Theme 2: Ask for user rating after solving
+
+Observed in: LeetSRS, AlgoRecall, LeetCycle, HashTry-like self-assessment workflows.
+
+**Mechanism:**  
+After a solve or review, the user rates performance using labels such as Again, Hard, Good, Easy, or confidence levels.
+
+**Why it matters:**  
+The rating turns raw completion into a mastery signal. A solved problem can still be weak if the user needed hints, took too long, or could not explain the pattern.
+
+---
+
+## Theme 3: Use readiness scoring
+
+Observed in: HashTry.
+
+**Mechanism:**  
+Aggregate several practice signals into a single readiness score.
+
+**Common score inputs:**
+
+- Topic coverage.
+- Solve speed.
+- Solution quality.
+- Consistency.
+- Self-assessment accuracy.
+- Review health.
+
+---
+
+## Theme 4: Use curated roadmaps
+
+Observed in: NeetCode, Striver / TakeUForward, Grind 75, LeetDaily, LeetTracker, FleetCode.
+
+**Mechanism:**  
+Problems are grouped into known interview-prep lists. The user is guided through topic sections and next-unsolved items.
+
+**Common roadmap signals:**
+
+- Sheet membership.
+- Topic section.
+- Difficulty.
+- Problem order.
+- Completion state.
+- User’s current progress.
+
+---
+
+## Theme 5: Recommend by pattern, not only topic
+
+Observed in: AlgoMonster, NeetCode, StudyCards AI, some spaced-repetition tools.
+
+**Mechanism:**  
+The platform teaches or reviews reusable patterns. Problems are recommended because they reinforce a pattern or subpattern.
+
+**Useful pattern examples:**
+
+- Fixed sliding window.
+- Variable sliding window.
+- Prefix sum plus hashmap.
+- Monotonic stack.
+- Binary search on answer.
+- Tree DFS recursion.
+- BFS shortest path.
+- Topological sort.
+- 1-D dynamic programming.
+- 2-D dynamic programming.
+- Backtracking with pruning.
+
+---
+
+## Theme 6: Provide daily or session-based practice
+
+Observed in: LeetDaily, SpaceDSA, LeetReviewer, Codewars.
+
+**Mechanism:**  
+Instead of presenting a huge problem list, the product recommends a small session: today’s challenge, due reviews, next unsolved, or a filtered practice block.
+
+**Session examples:**
+
+- Today’s daily challenge.
 - Due reviews.
-- Next unsolved sheet problem.
-- Top 3 weak topics.
-- 3 similar problems per problem.
-- Basic readiness score.
-```
-
-## MVP formulas
-
-Solved problem:
-
-```txt
-review_score =
-  3 * overdue_days
-+ 4 * failed_last_review
-+ 2 * low_confidence
-+ 2 * weak_pattern_match
-+ 1 * solved_with_hint
-```
-
-Unsolved problem:
-
-```txt
-new_problem_score =
-  3 * sheet_priority
-+ 4 * weak_pattern_match
-+ 3 * difficulty_fit
-+ 2 * prerequisite_ready
-+ 1 * diversity_bonus
-```
-
-Similar problem:
-
-```txt
-similar_score =
-  5 * same_subpattern
-+ 3 * same_template
-+ 2 * difficulty_fit
-+ 2 * sheet_relevance
-- 3 * solved_recently
-```
+- Topic-specific session.
+- Difficulty-specific session.
+- Weak-area session.
+- Random revision.
+- Timed practice.
 
 ---
 
-# 15. Advanced recommendation system
+## Theme 7: Add gamified progression
 
-Add these after MVP:
+Observed in: Codewars, LeetSRS streaks/stats, LeetDaily focus streaks, LeetTracker streaks.
 
-```txt
-1. FSRS or SM-2 scheduler.
-2. Personalized difficulty model.
-3. Pattern graph with prerequisite edges.
-4. Embedding-based problem similarity.
-5. AI-generated explanation and hinting.
-6. Deadline-aware study planner.
-7. Company-targeted recommendation mode.
-8. User skip feedback loop.
-9. A/B testing for recommendation quality.
-10. Readiness score by topic and overall.
-```
+**Mechanism:**  
+The platform motivates repeated behavior through ranks, progress bars, streaks, badges, honor, or mastery levels.
 
----
+**Useful gamification objects:**
 
-# 16. Success metrics
-
-Track whether recommendations actually help.
-
-```txt
-Recommendation metrics:
-- Click-through rate.
-- Skip rate.
-- Completion rate.
-- Solve success rate.
-- Hint usage after recommendation.
-- Time to solve.
-- Review pass rate.
-- Repeated failure rate.
-- Time-to-master per topic.
-- Retention after 7/14/30 days.
-
-Business/product metrics:
-- Daily active users.
-- Weekly retained users.
-- Average problems reviewed per week.
-- Average new problems solved per week.
-- Streak recovery after inactivity.
-- Interview readiness improvement over time.
-```
-
-Use recommendation events to improve ranking:
-
-```txt
-If user repeatedly skips a type:
-  reduce that recommendation type temporarily.
-
-If user clicks but fails often:
-  lower difficulty or add bridge problems.
-
-If user completes easily:
-  increase difficulty or interval.
-
-If user solves weak-topic recommendations successfully:
-  reduce weakness score and move to next pattern.
-```
+- Topic XP.
+- Pattern level.
+- Review streak.
+- Roadmap completion percentage.
+- Mastery badges.
+- Interview-readiness milestones.
 
 ---
 
-# 17. Guardrails
+## Theme 8: Recommend feedback actions, not just problems
 
-```txt
-- Do not recommend only hard problems because the user is advanced.
-- Do not recommend only overdue reviews; mix in progress.
-- Do not recommend a hard target before prerequisites are solved.
-- Do not use broad tags as the only similarity signal.
-- Do not let AI invent metadata.
-- Do not hide why a problem was recommended.
-- Do not over-penalize users after inactivity.
-- Do not treat solved once as mastered.
-- Do not treat solved with editorial as equal to unaided solve.
-```
+Observed in: Exercism, AlgoMonster AI hints, LeetReviewer recall sessions.
 
----
+**Mechanism:**  
+The product guides the learner to reflect, get hints, review feedback, or improve a solution.
 
-# 18. Recommended CrackedIn.io modules
+**Action examples:**
 
-## 18.1 Today page
-
-```txt
-- Due Reviews
-- Next Best Problem
-- Weak Topic Drill
-- Continue Sheet
-- Quick Win
-```
-
-## 18.2 Problem page
-
-```txt
-- Pattern classification
-- Similar problems
-- Easier prerequisite
-- Harder follow-up
-- Contrast problem
-- Spoiler-free hint
-- Review history
-```
-
-## 18.3 Analytics page
-
-```txt
-- Overall readiness score
-- Topic readiness
-- Weakest patterns
-- Review health
-- Sheet completion
-- Solve speed trend
-- Confidence calibration
-```
-
-## 18.4 Planner page
-
-```txt
-- Choose target sheet
-- Set interview date
-- Set daily time
-- Select target topics/company
-- Generate weekly plan
-```
+- Re-explain your approach.
+- Compare with an optimal solution.
+- Review missed edge cases.
+- Redo without hints.
+- Refactor code.
+- Ask for feedback.
 
 ---
 
-# 19. Best combined strategy for CrackedIn.io
+# Source Index
 
-Recommended final approach:
-
-```txt
-1. Use the standard sheet for base order.
-2. Use SRS for solved problem review.
-3. Use weak-pattern scoring for personalization.
-4. Use pattern similarity for related practice.
-5. Use prerequisite graph for bridge recommendations.
-6. Use readiness score to explain progress.
-7. Use AI only for classification, hints, and explanations.
-```
-
-The core product promise can be:
-
-```txt
-CrackedIn.io tells users exactly what to solve next, what to review before they forget it, and which weak pattern each recommendation is fixing.
-```
-
----
-
-# 20. Source notes
-
-These public sources were used to understand platform behavior and recommendation patterns:
-
-1. LeetSRS official site: https://leetsrs.com/
-2. LeetSRS GitHub repository: https://github.com/mattcdrake/LeetSRS
-3. LeetSRS Chrome Web Store listing: https://chromewebstore.google.com/detail/leetsrs/odgfcigkohoimpeeooifjdglncggkgko
-4. HashTry official site: https://hashtry.io/
-5. HashTry Chrome Web Store listing: https://chromewebstore.google.com/detail/hashtry/oigaclkkebclkjkmhdkemppdefhenknp
-6. LeetReviewer official site: https://leetreviewer.com/
-7. LeetRecall Chrome Web Store listing: https://chromewebstore.google.com/detail/leetrecall/lphmfhcelhlgpmijomapaodlmebogmip
-8. AlgoRecall Chrome Web Store listing: https://chromewebstore.google.com/detail/algorecall-%E2%80%94-leetcode-spa/hjfjdhpaddkdnjndeaalchgjnimioaln
-9. SpaceDSA Chrome Web Store listing: https://chromewebstore.google.com/detail/spacedsa-leetcode-study-p/phdohlijhchimahmdicclcimgdlcegdd
-10. DSA Spaced Repetition Chrome Web Store listing: https://chromewebstore.google.com/detail/dsa-spaced-repetition/lcmbmephjkhhdmicgnggilhinhlpbklc
-11. leetcode-review GitHub repository: https://github.com/kunleihe/leetcode-review
-12. NeetCode 150 page: https://neetcode.io/practice/practice/neetcode150
-13. AlgoMonster landing/path pages: https://algo.monster/landing and https://algo.monster/path
-14. Striver SDE Sheet / TakeUForward: https://takeuforward.org/dsa/strivers-sde-sheet-top-coding-interview-problems
-15. Grind 75 / Tech Interview Handbook: https://www.techinterviewhandbook.org/grind75/
-16. LeetDaily: https://leetdaily.masst.dev/
-17. Codewars rank documentation: https://docs.codewars.com/gamification/ranks/
-18. Codewars honor documentation: https://docs.codewars.com/gamification/honor/
-19. Exercism mentoring docs: https://exercism.org/docs/mentoring
-20. TS-FSRS documentation: https://open-spaced-repetition.github.io/ts-fsrs/
+- LeetSRS: https://leetsrs.com/
+- LeetSRS GitHub: https://github.com/mattcdrake/LeetSRS
+- LeetSRS Chrome Web Store: https://chromewebstore.google.com/detail/leetsrs/odgfcigkohoimpeeooifjdglncggkgko
+- HashTry: https://hashtry.io/
+- HashTry Chrome Web Store: https://chromewebstore.google.com/detail/hashtry/oigaclkkebclkjkmhdkemppdefhenknp
+- LeetReviewer: https://leetreviewer.com/
+- LeetRecall Chrome Web Store: https://chromewebstore.google.com/detail/leetrecall/lphmfhcelhlgpmijomapaodlmebogmip
+- AlgoRecall Chrome Web Store: https://chromewebstore.google.com/detail/algorecall-%E2%80%94-leetcode-spa/hjfjdhpaddkdnjndeaalchgjnimioaln
+- AlgoRecall GitHub: https://github.com/Ashtam01/AlgoRecall
+- SpaceDSA Chrome Web Store: https://chromewebstore.google.com/detail/spacedsa-leetcode-study-p/phdohlijhchimahmdicclcimgdlcegdd
+- LeetCycle: https://www.leetcycle.com/
+- LeetSpace: https://www.leetspace.dev/
+- SpacedSmart: https://www.spacedsmart.com/
+- SpacedLeet: https://spacedleet.vercel.app/
+- NeetCode 150: https://neetcode.io/practice/practice/neetcode150
+- NeetCode Practice: https://neetcode.io/practice
+- AlgoMonster Dashboard: https://algo.monster/dashboard
+- AlgoMonster Landing: https://algo.monster/landing?t=1
+- Striver SDE Sheet / TakeUForward: https://takeuforward.org/dsa/strivers-sde-sheet-top-coding-interview-problems
+- Grind 75 / Tech Interview Handbook: https://www.techinterviewhandbook.org/grind75/
+- Tech Interview Handbook GitHub: https://github.com/yangshun/tech-interview-handbook
+- LeetDaily: https://leetdaily.masst.dev/
+- LeetDaily sheet article: https://leetdaily.masst.dev/blog/blind-75-vs-neetcode-150-vs-leetcode-75
+- LeetTracker: https://www.leettracker.com/problems
+- FleetCode DSA Sheets: https://www.talentd.in/fleetcode/sheets
+- Codewars Gamification: https://docs.codewars.com/gamification/
+- Codewars Ranks: https://docs.codewars.com/gamification/ranks/
+- Codewars Honor: https://docs.codewars.com/gamification/honor/
+- Exercism Docs: https://exercism.org/docs
+- Exercism Mentoring Docs: https://exercism.org/docs/mentoring
+- StudyCards AI LeetCode SRS article: https://studycardsai.com/blog/spaced-repetition-for-leetcode
