@@ -1,6 +1,6 @@
 # CrackedIn.io: Competitor Recommendation Strategies Blueprint
 
-This document summarizes recommendation strategies used by other coding-interview, LeetCode-tracking, spaced-repetition, roadmap, and practice platforms. It is written for CrackedIn.io, assuming the platform already has:
+This document summarizes recommendation strategies used by other coding-interview, LeetCode-tracking, spaced-repetition, roadmap, and practice platforms. Our current status
 
 - User LeetCode synced ID.
 - Solved and unsolved status for a standard problem sheet.
