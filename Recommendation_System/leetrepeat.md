@@ -85,8 +85,3 @@ LeetRepeat uses a modified Leitner system with the following intervals:
 | 4     | 14 Days  | Long Term |
 | 5     | 30 Days  | Mastered 🏆 |
 
----
-
-## 📄 License
-
-MIT License. Feel free to use and modify for your own learning journey.
