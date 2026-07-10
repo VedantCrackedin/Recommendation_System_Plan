@@ -441,32 +441,17 @@ This document contains the complete consolidated list of user queries collected 
 
 159. and what about past 3 months ?
 
-160. show me google l3 interview experiences
-
-161. what does crackedin do?
 
 
 
 
+# Interview Query Types and Recommended Retrieval Methods
 
+This document contains only the query type, example user questions, and the recommended retrieval method.
 
+## 1. Company-Specific Interview Experience Queries
 
-# Interview Query Taxonomy for CrackedIn Silver Layer
-
-## Purpose
-
-The goal is to help decide when the system should use:
-
-- SQL(using tool calling method)
-- Embeddings
-- Hybrid retrieval
-
-
----
-
-# 1. Company-Specific Interview Experience Queries
-
-## What users may ask
+### Example questions
 
 - What is the Google interview process?
 - Show me Amazon interview experiences.
@@ -475,17 +460,7 @@ The goal is to help decide when the system should use:
 - What does Flipkart ask in SDE interviews?
 - Do you have Juniper Square interview experiences?
 
-## Useful metadata
-
-- Company
-- Role
-- Level
-- Location
-- Experience date
-- Interview stage
-- Employment type
-
-## Best retrieval method
+### Recommended method
 
 **Hybrid retrieval**
 
@@ -493,9 +468,9 @@ Use SQL for exact company, role, level, and date filters. Use embeddings to find
 
 ---
 
-# 2. Exact Interview Question Queries
+## 2. Exact Interview Question Queries
 
-## What users may ask
+### Example questions
 
 - Give me actual questions asked at Google.
 - What coding questions were asked in Amazon interviews?
@@ -504,21 +479,7 @@ Use SQL for exact company, role, level, and date filters. Use embeddings to find
 - Give me exact questions asked in PayPay backend interviews.
 - Which LeetCode problems appeared in Google interviews?
 
-## Possible question categories
-
-- Coding
-- System design
-- Low-level design
-- Behavioral
-- SQL
-- Computer science fundamentals
-- Machine learning
-- Frontend
-- Backend
-- DevOps
-- Aptitude
-
-## Best retrieval method
+### Recommended method
 
 **Hybrid retrieval over question-level events**
 
@@ -526,9 +487,9 @@ The retrieval unit should be an individual question rather than an entire interv
 
 ---
 
-# 3. Role-Specific Interview Queries
+## 3. Role-Specific Interview Queries
 
-## What users may ask
+### Example questions
 
 - What do companies ask backend engineers?
 - Show me frontend interview experiences.
@@ -537,33 +498,15 @@ The retrieval unit should be an individual question rather than an entire interv
 - Give me data engineer interview questions.
 - What is asked in an ML engineer interview?
 
-## Useful metadata
-
-- Role
-- Role family
-- Seniority
-- Required skills
-- Interview stage
-- Company
-
-## Role normalization examples
-
-- SDE
-- Software Engineer
-- Backend Developer
-- Backend Engineer
-- Platform Engineer
-- API Engineer
-
-## Best retrieval method
+### Recommended method
 
 **SQL role filters plus semantic role expansion**
 
 ---
 
-# 4. Level-Specific Interview Queries
+## 4. Level-Specific Interview Queries
 
-## What users may ask
+### Example questions
 
 - Google L3 interview experience
 - Amazon SDE-1 interview questions
@@ -572,19 +515,7 @@ The retrieval unit should be an individual question rather than an entire interv
 - What is asked for staff engineer roles?
 - Is system design asked for freshers?
 
-## Common levels
-
-- Intern
-- New graduate
-- Entry level
-- SDE-1
-- SDE-2
-- Senior
-- Staff
-- Principal
-- Engineering Manager
-
-## Best retrieval method
+### Recommended method
 
 **SQL-first hybrid retrieval**
 
@@ -592,9 +523,9 @@ Level should usually be treated as a strong or hard filter.
 
 ---
 
-# 5. Interview Stage Queries
+## 5. Interview Stage Queries
 
-## What users may ask
+### Example questions
 
 - What is asked in the online assessment?
 - Show me Google phone-screen questions.
@@ -604,31 +535,15 @@ Level should usually be treated as a strong or hard filter.
 - What happens in the bar raiser round?
 - What questions are asked in HR interviews?
 
-## Common round types
-
-- Online assessment
-- Coding screen
-- Phone interview
-- Technical interview
-- Machine coding
-- System design
-- Low-level design
-- Behavioral
-- Managerial
-- HR
-- Bar raiser
-- Case study
-- Take-home assignment
-
-## Best retrieval method
+### Recommended method
 
 **SQL round-type filtering plus embeddings over round content**
 
 ---
 
-# 6. Recent and Time-Sensitive Queries
+## 6. Recent and Time-Sensitive Queries
 
-## What users may ask
+### Example questions
 
 - What has Google asked in the last six months?
 - Show me 2026 Amazon OA questions.
@@ -637,15 +552,7 @@ Level should usually be treated as a strong or hard filter.
 - What interview pattern is currently followed by Flipkart?
 - Has the PayPay interview process changed recently?
 
-## Useful date fields
-
-- Interview date
-- Post date
-- Date inferred from text
-- Date confidence
-- Source freshness
-
-## Best retrieval method
+### Recommended method
 
 **SQL date filtering plus semantic retrieval and freshness ranking**
 
@@ -653,9 +560,9 @@ The system should distinguish the date the interview happened from the date the 
 
 ---
 
-# 7. Frequency and Trend Queries
+## 7. Frequency and Trend Queries
 
-## What users may ask
+### Example questions
 
 - What are the most common Google coding questions?
 - Which topics are frequently asked at Amazon?
@@ -664,34 +571,15 @@ The system should distinguish the date the interview happened from the date the 
 - Which system design questions repeat most often?
 - What are the trending topics in recent Flipkart interviews?
 
-## Required operations
-
-- Count question events
-- Count distinct interview posts
-- Group by company
-- Group by role
-- Group by round
-- Group by date window
-- Compare current and previous periods
-
-## Important semantic normalization
-
-Different wording may represent the same question family:
-
-- Design an LRU cache
-- Implement cache eviction
-- Build a least-recently-used cache
-- Design an in-memory cache with eviction
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation after semantic clustering or normalization**
 
 ---
 
-# 8. “Was This Question Asked?” Queries
+## 8. “Was This Question Asked?” Queries
 
-## What users may ask
+### Example questions
 
 - Has LRU Cache been asked at Google?
 - Was checksum asked in Amazon OA?
@@ -699,22 +587,15 @@ Different wording may represent the same question family:
 - Do backend interviews at PayPay ask Kafka?
 - Has URL Shortener been asked for SDE-2 roles?
 
-## Recommended confidence labels
-
-- Confirmed exact match
-- Probable semantic variation
-- Weak mention
-- No reliable evidence found
-
-## Best retrieval method
+### Recommended method
 
 **Exact SQL match plus semantic match plus evidence verification**
 
 ---
 
-# 9. Count-Based Queries
+## 9. Count-Based Queries
 
-## What users may ask
+### Example questions
 
 - How many times has LRU Cache been asked at Google?
 - How often was checksum asked in the last six months?
@@ -722,14 +603,7 @@ Different wording may represent the same question family:
 - Which company asks system design most frequently?
 - How many interview posts mention Kubernetes?
 
-## Counting options
-
-- Distinct question events
-- Distinct interview experiences
-- Distinct candidates
-- Distinct interview rounds
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation after semantic normalization**
 
@@ -737,9 +611,9 @@ The answer should clearly state what exactly was counted.
 
 ---
 
-# 10. Topic-Specific Interview Queries
+## 10. Topic-Specific Interview Queries
 
-## What users may ask
+### Example questions
 
 - Give me Google graph questions.
 - What DP problems are asked at Amazon?
@@ -748,46 +622,15 @@ The answer should clearly state what exactly was counted.
 - Give me database questions asked at product companies.
 - What concurrency questions are asked in Java interviews?
 
-## Suggested topic hierarchy
-
-### DSA
-
-- Arrays
-- Strings
-- Hashing
-- Linked lists
-- Trees
-- Graphs
-- Dynamic programming
-- Greedy
-- Binary search
-
-### CS fundamentals
-
-- Operating systems
-- DBMS
-- Networking
-- OOP
-- Concurrency
-
-### Engineering
-
-- Backend
-- Frontend
-- DevOps
-- Cloud
-- Distributed systems
-- Databases
-
-## Best retrieval method
+### Recommended method
 
 **SQL topic filters plus embedding-based topic expansion**
 
 ---
 
-# 11. Problem Pattern Queries
+## 11. Problem Pattern Queries
 
-## What users may ask
+### Example questions
 
 - What sliding window questions are asked at Google?
 - Give me two-pointer interview questions.
@@ -795,28 +638,15 @@ The answer should clearly state what exactly was counted.
 - Show me monotonic stack questions from real interviews.
 - What cache design problems are frequently asked?
 
-## Common patterns
-
-- Sliding window
-- Two pointers
-- Prefix sum
-- Binary search on answer
-- Topological sort
-- Shortest path
-- Union-find
-- Interval merging
-- Backtracking
-- State-space dynamic programming
-
-## Best retrieval method
+### Recommended method
 
 **Normalized pattern tags plus semantic retrieval**
 
 ---
 
-# 12. Similar Question Queries
+## 12. Similar Question Queries
 
-## What users may ask
+### Example questions
 
 - Show me questions similar to LRU Cache.
 - What questions are like Longest Increasing Subsequence?
@@ -824,7 +654,7 @@ The answer should clearly state what exactly was counted.
 - Give me variations of Two Sum asked in interviews.
 - What questions are similar to designing a rate limiter?
 
-## Best retrieval method
+### Recommended method
 
 **Embedding search over normalized question text**
 
@@ -832,9 +662,9 @@ SQL alone is not suitable for semantic similarity.
 
 ---
 
-# 13. Question Variation Queries
+## 13. Question Variation Queries
 
-## What users may ask
+### Example questions
 
 - What variations of Two Sum are asked at Google?
 - How is LRU Cache modified in interviews?
@@ -842,24 +672,15 @@ SQL alone is not suitable for semantic similarity.
 - What harder versions of BFS are asked at Amazon?
 - What variations of rate limiter appear in system design interviews?
 
-## Data that should be stored
-
-- Base problem
-- Question variation
-- Follow-up
-- Constraint change
-- Difficulty escalation
-- Interviewer hint
-
-## Best retrieval method
+### Recommended method
 
 **Question-family clustering plus embeddings**
 
 ---
 
-# 14. Follow-Up Question Queries
+## 14. Follow-Up Question Queries
 
-## What users may ask
+### Example questions
 
 - What follow-ups are asked after solving LRU Cache?
 - How do interviewers extend the Two Sum problem?
@@ -867,23 +688,15 @@ SQL alone is not suitable for semantic similarity.
 - What optimization questions are asked after the first solution?
 - Do they ask for time and space complexity?
 
-## Useful event structure
-
-- Initial question
-- Candidate solution
-- Interviewer follow-up
-- Changed constraint
-- Optimization request
-
-## Best retrieval method
+### Recommended method
 
 **Structured event-level retrieval**
 
 ---
 
-# 15. Difficulty Queries
+## 15. Difficulty Queries
 
-## What users may ask
+### Example questions
 
 - How difficult are Google coding interviews?
 - Are Amazon OA questions mostly medium or hard?
@@ -892,15 +705,7 @@ SQL alone is not suitable for semantic similarity.
 - Give me easy interview questions asked at product companies.
 - Are senior interviews more focused on system design?
 
-## Possible difficulty sources
-
-- Linked LeetCode difficulty
-- Candidate-reported difficulty
-- Model-inferred difficulty
-- Completion rate
-- Time required
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation over calibrated difficulty fields**
 
@@ -908,9 +713,9 @@ Different difficulty sources should be labeled separately.
 
 ---
 
-# 16. Interview Process Queries
+## 16. Interview Process Queries
 
-## What users may ask
+### Example questions
 
 - What is the complete Google interview process?
 - How many rounds does Amazon have?
@@ -919,23 +724,15 @@ Different difficulty sources should be labeled separately.
 - Is there a machine coding round at Flipkart?
 - Does PayPay have a system design round?
 
-## Recommended output
-
-- Typical process
-- Common variations
-- Role-specific differences
-- Location-specific differences
-- Confidence level
-
-## Best retrieval method
+### Recommended method
 
 **Structured aggregation from multiple interview experiences**
 
 ---
 
-# 17. Interview Duration Queries
+## 17. Interview Duration Queries
 
-## What users may ask
+### Example questions
 
 - How long is each Google interview round?
 - How much time is given in Amazon OA?
@@ -943,22 +740,15 @@ Different difficulty sources should be labeled separately.
 - How many coding questions are asked in 60 minutes?
 - How long is the system design round?
 
-## Recommended statistics
-
-- Median
-- Common range
-- Minimum and maximum
-- Sample size
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation over duration fields**
 
 ---
 
-# 18. Location-Specific Queries
+## 18. Location-Specific Queries
 
-## What users may ask
+### Example questions
 
 - Google India interview experience
 - Amazon US interview process
@@ -967,25 +757,15 @@ Different difficulty sources should be labeled separately.
 - Is the process different in London?
 - What does Google Warsaw ask?
 
-## Location-sensitive differences
-
-- Round count
-- Role expectations
-- Visa discussion
-- Compensation discussion
-- Language
-- Assessment platform
-- Interview format
-
-## Best retrieval method
+### Recommended method
 
 **SQL location filtering plus hybrid retrieval**
 
 ---
 
-# 19. Employment-Type Queries
+## 19. Employment-Type Queries
 
-## What users may ask
+### Example questions
 
 - Google internship interview experience
 - Amazon new graduate questions
@@ -994,26 +774,15 @@ Different difficulty sources should be labeled separately.
 - Campus placement interview experience
 - Lateral hiring questions for senior engineers
 
-## Common employment types
-
-- Internship
-- New graduate
-- Campus
-- Off campus
-- Lateral
-- Contract
-- Returnship
-- Apprenticeship
-
-## Best retrieval method
+### Recommended method
 
 **SQL hard filtering**
 
 ---
 
-# 20. Candidate Background Queries
+## 20. Candidate Background Queries
 
-## What users may ask
+### Example questions
 
 - Show me interview experiences from freshers.
 - What was asked to candidates from tier-3 colleges?
@@ -1021,16 +790,7 @@ Different difficulty sources should be labeled separately.
 - What questions are asked during career switches?
 - Give me experiences of frontend developers moving to backend.
 
-## Possible metadata
-
-- Years of experience
-- Current role
-- Education
-- Candidate background
-- Previous company
-- Career transition
-
-## Best retrieval method
+### Recommended method
 
 **SQL metadata filtering when reliable data is available**
 
@@ -1038,9 +798,9 @@ This data may be sensitive, incomplete, or self-reported and should be used care
 
 ---
 
-# 21. Technology-Specific Queries
+## 21. Technology-Specific Queries
 
-## What users may ask
+### Example questions
 
 - What Java questions are asked at Amazon?
 - Give me React interview questions from real experiences.
@@ -1049,23 +809,15 @@ This data may be sensitive, incomplete, or self-reported and should be used care
 - What SQL queries are asked in data engineering interviews?
 - What Spring Boot questions appear in interviews?
 
-## Technology normalization examples
-
-- Postgres → PostgreSQL
-- JS → JavaScript
-- K8s → Kubernetes
-- GCP Cloud SQL → Cloud SQL
-- Node → Node.js
-
-## Best retrieval method
+### Recommended method
 
 **Technology tags plus semantic retrieval**
 
 ---
 
-# 22. Domain-Specific Interview Queries
+## 22. Domain-Specific Interview Queries
 
-## What users may ask
+### Example questions
 
 - What fintech companies ask in backend interviews?
 - Give me e-commerce system design questions.
@@ -1073,28 +825,15 @@ This data may be sensitive, incomplete, or self-reported and should be used care
 - What security questions appear in banking interviews?
 - What healthcare companies ask data engineers?
 
-## Common domains
-
-- Fintech
-- E-commerce
-- Payments
-- Banking
-- Healthcare
-- Ad tech
-- Social media
-- Cloud infrastructure
-- Cybersecurity
-- Gaming
-
-## Best retrieval method
+### Recommended method
 
 **Company-domain mapping plus embeddings**
 
 ---
 
-# 23. Coding Language Queries
+## 23. Coding Language Queries
 
-## What users may ask
+### Example questions
 
 - Can I use C++ in Google interviews?
 - Are Amazon OA questions language-independent?
@@ -1102,7 +841,7 @@ This data may be sensitive, incomplete, or self-reported and should be used care
 - Do frontend interviews require JavaScript?
 - Which language is preferred for PayPay backend interviews?
 
-## Best retrieval method
+### Recommended method
 
 **Structured metadata plus company guidelines and interview evidence**
 
@@ -1110,9 +849,9 @@ A single interview experience should not be treated as official company policy.
 
 ---
 
-# 24. Behavioral Interview Queries
+## 24. Behavioral Interview Queries
 
-## What users may ask
+### Example questions
 
 - What behavioral questions does Amazon ask?
 - Give me Google leadership questions.
@@ -1121,28 +860,15 @@ A single interview experience should not be treated as official company policy.
 - How should I answer “Tell me about yourself”?
 - What STAR questions appeared in real interviews?
 
-## Behavioral categories
-
-- Leadership
-- Conflict
-- Failure
-- Ownership
-- Teamwork
-- Ambiguity
-- Impact
-- Customer focus
-- Motivation
-- Career goals
-
-## Best retrieval method
+### Recommended method
 
 **Embedding search over behavioral-question events**
 
 ---
 
-# 25. Company Values and Principles Queries
+## 25. Company Values and Principles Queries
 
-## What users may ask
+### Example questions
 
 - Which Amazon leadership principles are commonly tested?
 - How does Google assess Googliness?
@@ -1150,15 +876,15 @@ A single interview experience should not be treated as official company policy.
 - Which behavioral stories should I prepare for Uber?
 - What principles are tested in a bar raiser interview?
 
-## Best retrieval method
+### Recommended method
 
 **Company-value mapping plus interview-experience retrieval**
 
 ---
 
-# 26. System Design Queries
+## 26. System Design Queries
 
-## What users may ask
+### Example questions
 
 - What system design questions are asked at Google?
 - Has URL Shortener been asked at Amazon?
@@ -1167,27 +893,15 @@ A single interview experience should not be treated as official company policy.
 - Give me recent backend system design experiences.
 - What follow-ups are asked in rate limiter design?
 
-## System design categories
-
-- High-level design
-- Low-level design
-- API design
-- Database design
-- Distributed systems
-- Scalability
-- Reliability
-- Capacity estimation
-- Trade-offs
-
-## Best retrieval method
+### Recommended method
 
 **Hybrid question search plus role and level filtering**
 
 ---
 
-# 27. Low-Level Design and Machine Coding Queries
+## 27. Low-Level Design and Machine Coding Queries
 
-## What users may ask
+### Example questions
 
 - What LLD questions are asked at Flipkart?
 - Give me machine coding round experiences.
@@ -1196,15 +910,15 @@ A single interview experience should not be treated as official company policy.
 - What are common follow-ups in LLD rounds?
 - How much code must be completed?
 
-## Best retrieval method
+### Recommended method
 
 **Structured round filtering plus semantic question retrieval**
 
 ---
 
-# 28. Online Assessment Queries
+## 28. Online Assessment Queries
 
-## What users may ask
+### Example questions
 
 - What was asked in Google OA 2026?
 - Which platform does Amazon use for OA?
@@ -1214,28 +928,15 @@ A single interview experience should not be treated as official company policy.
 - Was proctoring enabled?
 - How difficult was the OA?
 
-## Useful OA metadata
-
-- Platform
-- Number of questions
-- Duration
-- Sections
-- Difficulty
-- Cutoff
-- Proctoring
-- Date
-- Role
-- Location
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation plus experience evidence**
 
 ---
 
-# 29. Interview Outcome Queries
+## 29. Interview Outcome Queries
 
-## What users may ask
+### Example questions
 
 - Did the candidate get selected?
 - What mistakes caused rejection?
@@ -1244,16 +945,7 @@ A single interview experience should not be treated as official company policy.
 - Does solving both questions guarantee selection?
 - How important is communication?
 
-## Useful metadata
-
-- Outcome
-- Round cleared
-- Rejection stage
-- Candidate reflection
-- Feedback
-- Offer status
-
-## Best retrieval method
+### Recommended method
 
 **Structured retrieval plus careful interpretation**
 
@@ -1261,9 +953,9 @@ Candidate speculation should not be presented as confirmed recruiter reasoning.
 
 ---
 
-# 30. Failure Pattern Queries
+## 30. Failure Pattern Queries
 
-## What users may ask
+### Example questions
 
 - Why do candidates fail Google interviews?
 - What common mistakes happen in Amazon OA?
@@ -1271,21 +963,15 @@ Candidate speculation should not be presented as confirmed recruiter reasoning.
 - Which behavioral mistakes are risky?
 - What mistakes do candidates make in machine coding?
 
-## Evidence categories
-
-- Explicit interviewer feedback
-- Candidate assumption
-- Pattern inferred across multiple posts
-
-## Best retrieval method
+### Recommended method
 
 **Semantic clustering of reflections and feedback**
 
 ---
 
-# 31. Preparation Strategy Queries
+## 31. Preparation Strategy Queries
 
-## What users may ask
+### Example questions
 
 - How should I prepare for Google in 30 days?
 - What should I study for Amazon SDE-1?
@@ -1294,15 +980,15 @@ Candidate speculation should not be presented as confirmed recruiter reasoning.
 - How many problems should I solve before interviewing?
 - Should I focus on DSA or system design?
 
-## Best retrieval method
+### Recommended method
 
 **Company evidence plus user profile plus planning logic**
 
 ---
 
-# 32. Personalized Company Preparation Queries
+## 32. Personalized Company Preparation Queries
 
-## What users may ask
+### Example questions
 
 - Based on my LeetCode profile, am I ready for Google?
 - What should I solve before my Amazon interview?
@@ -1311,25 +997,15 @@ Candidate speculation should not be presented as confirmed recruiter reasoning.
 - Which Google questions have I not solved?
 - Recommend questions based on my progress.
 
-## Required data
-
-- User solved problems
-- Weak topics
-- Difficulty profile
-- Target company
-- Target role
-- Interview date
-- Recent revision history
-
-## Best retrieval method
+### Recommended method
 
 **User SQL data plus hybrid company-corpus retrieval**
 
 ---
 
-# 33. Readiness Assessment Queries
+## 33. Readiness Assessment Queries
 
-## What users may ask
+### Example questions
 
 - Am I ready for a Google interview?
 - What are my gaps for SDE-1?
@@ -1337,26 +1013,15 @@ Candidate speculation should not be presented as confirmed recruiter reasoning.
 - How much of the Microsoft interview syllabus have I covered?
 - What is my probability of clearing the OA?
 
-## Safer output
-
-Instead of unsupported probability claims, return:
-
-- Coverage score
-- Topic gaps
-- Difficulty gaps
-- Recency of practice
-- Company-question coverage
-- Recommended next steps
-
-## Best retrieval method
+### Recommended method
 
 **User analytics plus company interview data**
 
 ---
 
-# 34. Comparison Queries
+## 34. Comparison Queries
 
-## What users may ask
+### Example questions
 
 - Google vs Amazon interview process
 - Which is harder: Microsoft or Uber?
@@ -1365,15 +1030,15 @@ Instead of unsupported probability claims, return:
 - Amazon SDE-1 vs SDE-2 interview differences
 - India vs US Google interviews
 
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation plus normalized comparison**
 
 ---
 
-# 35. Company Ranking Queries
+## 35. Company Ranking Queries
 
-## What users may ask
+### Example questions
 
 - Which companies ask the most graph questions?
 - Which companies focus heavily on system design?
@@ -1381,22 +1046,15 @@ Instead of unsupported probability claims, return:
 - Which companies are best for frontend candidates?
 - Which product companies ask medium-level DSA?
 
-## Required quality indicators
-
-- Sample size
-- Time window
-- Role scope
-- Confidence
-
-## Best retrieval method
+### Recommended method
 
 **SQL aggregation across companies**
 
 ---
 
-# 36. Cross-Company Pattern Queries
+## 36. Cross-Company Pattern Queries
 
-## What users may ask
+### Example questions
 
 - What questions repeat across FAANG companies?
 - Which system design questions are common across product companies?
@@ -1404,15 +1062,15 @@ Instead of unsupported probability claims, return:
 - Which questions are unique to Microsoft?
 - What interview patterns are common in fintech?
 
-## Best retrieval method
+### Recommended method
 
 **Question clustering plus company aggregation**
 
 ---
 
-# 37. Interview Experience Summary Queries
+## 37. Interview Experience Summary Queries
 
-## What users may ask
+### Example questions
 
 - Summarize this interview experience.
 - Give me the important points.
@@ -1421,27 +1079,15 @@ Instead of unsupported probability claims, return:
 - Make a timeline of this interview.
 - What should I learn from this experience?
 
-## Recommended output
-
-- Company
-- Role
-- Level
-- Rounds
-- Questions
-- Follow-ups
-- Difficulty
-- Outcome
-- Candidate advice
-
-## Best retrieval method
+### Recommended method
 
 **Document and event summarization**
 
 ---
 
-# 38. Evidence and Source Queries
+## 38. Evidence and Source Queries
 
-## What users may ask
+### Example questions
 
 - Where did this question come from?
 - Show me the original interview experience.
@@ -1450,24 +1096,15 @@ Instead of unsupported probability claims, return:
 - Is this a confirmed interview question?
 - Give me the source and date.
 
-## Provenance fields
-
-- Source
-- Post URL
-- Interview date
-- Posted date
-- Extracted text
-- Confidence
-
-## Best retrieval method
+### Recommended method
 
 **SQL provenance retrieval**
 
 ---
 
-# 39. Query by Description
+## 39. Query by Description
 
-## What users may ask
+### Example questions
 
 - What is the Google question where we find the longest increasing sequence?
 - Which Amazon problem involves cache eviction?
@@ -1475,7 +1112,7 @@ Instead of unsupported probability claims, return:
 - Find the problem where we merge overlapping meetings.
 - What question asks us to detect a cycle in a linked list?
 
-## Best retrieval method
+### Recommended method
 
 **Embedding search over problem descriptions**
 
@@ -1483,9 +1120,9 @@ This is one of the strongest reasons not to rely on SQL alone.
 
 ---
 
-# 40. Vague Conversational Queries
+## 40. Vague Conversational Queries
 
-## What users may ask
+### Example questions
 
 - What does Google ask?
 - Tell me about Amazon.
@@ -1494,27 +1131,15 @@ This is one of the strongest reasons not to rely on SQL alone.
 - What should I prepare?
 - What comes next?
 
-## Required behavior
-
-Use conversation history to resolve missing context.
-
-Example:
-
-```text
-Previous message: I am preparing for Google L3.
-Current message: Give me recent questions.
-Resolved query: Recent Google L3 interview questions.
-```
-
-## Best retrieval method
+### Recommended method
 
 **Conversation-aware hybrid retrieval**
 
 ---
 
-# 41. Multi-Constraint Queries
+## 41. Multi-Constraint Queries
 
-## What users may ask
+### Example questions
 
 - Show Google L3 graph questions asked in India in the last year.
 - Give me Amazon SDE-1 OA problems from the last six months.
@@ -1522,27 +1147,15 @@ Resolved query: Recent Google L3 interview questions.
 - Find medium DP questions asked to new graduates at Microsoft.
 - Which unsolved problems from recent Google interviews match my weak topics?
 
-## Possible constraints
-
-- Company
-- Role
-- Level
-- Location
-- Date
-- Round
-- Topic
-- Difficulty
-- User progress
-
-## Best retrieval method
+### Recommended method
 
 **SQL constraint engine plus embedding retrieval**
 
 ---
 
-# 42. Negative and Exclusion Queries
+## 42. Negative and Exclusion Queries
 
-## What users may ask
+### Example questions
 
 - Show Google questions excluding dynamic programming.
 - Give me backend experiences without system design.
@@ -1551,275 +1164,13 @@ Resolved query: Recent Google L3 interview questions.
 - Do not include behavioral questions.
 - Show questions not present in NeetCode 150.
 
-## Best retrieval method
+### Recommended method
 
 **SQL exclusion filters**
 
 ---
 
-# 43. Queries That Do Not Require Interview Corpus Retrieval
 
-## What users may ask
+160. show me google l3 interview experiences
 
-- What is memoization?
-- Explain Bellman-Ford.
-- Give C++ code for BFS.
-- What is the STAR method?
-- Explain CAP theorem.
-- How do I introduce myself?
-
-## Best routing target
-
-- Educational knowledge base
-- DSA tutor
-- Code assistant
-- General interview coach
-
-These queries should not automatically search the interview-experience corpus.
-
----
-
-# Recommended Top-Level Intent Taxonomy
-
-The production router does not need 43 separate intents. These can be grouped into 12 primary intents:
-
-```text
-1. FIND_EXPERIENCES
-2. FIND_QUESTIONS
-3. VERIFY_QUESTION
-4. COUNT_OR_TREND
-5. COMPARE_COMPANIES
-6. SUMMARIZE_EXPERIENCE
-7. EXPLAIN_INTERVIEW_PROCESS
-8. PERSONALIZED_PREPARATION
-9. RECOMMEND_PRACTICE
-10. INTERVIEW_COACHING
-11. EXPLAIN_CONCEPT
-12. DEBUG_CODE
-```
-
----
-
-# Entities and Modifiers to Extract
-
-For every interview-related query, extract as many of these fields as possible:
-
-```text
-company
-role
-level
-location
-date_range
-round_type
-topic
-technology
-question_type
-difficulty
-employment_type
-exact_problem
-problem_description
-user_state
-sort_order
-result_limit
-include_filters
-exclude_filters
-```
-
----
-
-# Retrieval Decision Matrix
-
-| Query type | SQL | Embeddings | User data |
-|---|---:|---:|---:|
-| Exact company, role, or date filter | High | Low | No |
-| Find real interview questions | Medium | High | No |
-| Was question X asked? | High | High | No |
-| Count or frequency | High | Medium | No |
-| Similar questions | Low | High | No |
-| Recent interview experiences | High | High | No |
-| Company preparation plan | Medium | High | Medium |
-| Personalized recommendations | High | Medium | High |
-| Compare companies | High | Medium | No |
-| Summarize one experience | Low | High | No |
-| Explain DSA concept | Low | Low | No |
-| Debug user code | Low | Low | Medium |
-
----
-
-# Final Retrieval Strategy
-
-Interview-related queries generally need three kinds of intelligence:
-
-## 1. Exact truth
-
-Use SQL for:
-
-- Company
-- Role
-- Level
-- Date
-- Round
-- Counts
-- Solved status
-- Location
-- Employment type
-
-## 2. Semantic meaning
-
-Use embeddings for:
-
-- Similar questions
-- Vague descriptions
-- Question variations
-- Semantic topics
-- Role aliases
-- Problem families
-
-## 3. Personalization
-
-Use user-profile SQL for:
-
-- Weak topics
-- Solved and unsolved problems
-- Difficulty readiness
-- Revision history
-- Target company
-- Target role
-- Recommended next questions
-
----
-
-# Recommended Silver-Layer Architecture
-
-```text
-User Query
-    ↓
-Conversation Context Resolution
-    ↓
-Intent Classification
-    ↓
-Entity and Constraint Extraction
-    ↓
-SQL Candidate Filtering
-    ↓
-Embedding Retrieval
-    ↓
-Hybrid Reranking
-    ↓
-Aggregation or Personalization
-    ↓
-Evidence-Backed Answer
-```
-
----
-
-# Recommended Silver-Layer Data Model
-
-## Interview posts
-
-```text
-silver_interview_posts
-- post_id
-- source
-- source_url
-- company_id
-- role_id
-- level
-- location
-- employment_type
-- interview_date
-- posted_date
-- raw_text
-- normalized_text
-- reliability_score
-```
-
-## Interview rounds
-
-```text
-silver_interview_rounds
-- round_id
-- post_id
-- round_type
-- round_order
-- duration
-- interviewer_count
-- difficulty_signal
-```
-
-## Question events
-
-```text
-silver_question_events
-- question_event_id
-- post_id
-- round_id
-- company_id
-- role_id
-- level
-- question_text
-- normalized_question
-- question_type
-- topics
-- patterns
-- technologies
-- leetcode_problem_id
-- asked_date
-- freshness_score
-- confidence_score
-```
-
-## Follow-up events
-
-```text
-silver_question_followups
-- followup_id
-- question_event_id
-- followup_text
-- constraint_change
-- optimization_request
-- difficulty_change
-```
-
-## Problem mentions
-
-```text
-silver_problem_mentions
-- mention_id
-- question_event_id
-- canonical_problem_id
-- leetcode_id
-- problem_title
-- match_type
-- match_confidence
-```
-
-## Search chunks
-
-```text
-silver_chunks
-- chunk_id
-- post_id
-- round_id
-- question_event_id
-- chunk_type
-- chunk_text
-- embedding
-```
-
----
-
-# Final Recommendation
-
-The silver layer should not choose only SQL or only embeddings.
-
-Use:
-
-```text
-SQL for precision
-Embeddings for recall
-Hybrid ranking for relevance
-User data for personalization
-```
-
-The ideal implementation is an SQL-controlled hybrid search system where structured constraints are respected first, semantic retrieval expands recall, and the final answer is backed by source evidence.
+161. what does crackedin do?
